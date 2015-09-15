@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.games.app;
+package net.sokontokoro_factory.api.ranking;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,7 +17,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 @Path("")
-public class Main {
+public class RankingIndex {
 
     private static final Logger LOGGER = Logger.getLogger(Main.class);
 

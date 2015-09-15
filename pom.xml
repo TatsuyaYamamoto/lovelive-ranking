@@ -2,7 +2,7 @@
 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.sokontokoro_factory</groupId>
-  <artifactId>api</artifactId>
+  <artifactId>gameAPI</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
   <!--
@@ -84,7 +84,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 
   <build>
 
-    <finalName>api</finalName>
+    <finalName>games</finalName>
 
     <plugins>
 
