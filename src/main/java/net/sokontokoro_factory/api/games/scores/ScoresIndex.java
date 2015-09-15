@@ -1,25 +1,23 @@
-package net.sokontokoro_factory.api.ranking;
+package net.sokontokoro_factory.api.games.scores;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import net.sokontokoro_factory.api.games.db.DBManager;
+import net.sokontokoro_factory.api.games.property.Property;
 
-
-import org.apache.log4j.Logger;
 
 @Path("")
-public class RankingIndex {
-
-    private static final Logger LOGGER = Logger.getLogger(Main.class);
+public class ScoresIndex {
 
     private @Context
     HttpServletRequest req;
@@ -39,27 +37,45 @@ public class RankingIndex {
     /*
     * スコア取得
     */
-    @Path("/scores/{game_name}")
+    @Path("/{game_name}")
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getScores(@PathParam(value = "game_name") String game_name) throws Exception{
+    public Response getScores(
+    		@PathParam(value = "game_name") String game_name, 
+    		@Context HttpServletRequest request) throws Exception{
 
-		// HttpSession session = req.getSession(false);
+		HttpSession session = request.getSession(false);
+    	
+    	if(session == null){
+    		return Response.status(Status.UNAUTHORIZED).entity("認証されていません。").build();
+    	}
+    	String scores = DBManager.getScores(game_name).toString();
 
-		// if (session != null) {
-			try{
-				return Response.ok().entity(DBManager.getScores(game_name).toString()).build();
-
-			} catch (Exception e) {
-				LOGGER.error("大変だ！"+e);
-				throw e;
-			}
-		// } else {
-		// 	return Response.status(Status.UNAUTHORIZED).entity("認証権限がありません。").build();
-		// }
+    	return Response.ok().entity(scores).build();
 
     }
 
+    @Path("/{game_name}")
+    @POST
+    @Consumes("application/json;charset=UTF-8")
+    public Response insertScore(@Context HttpServletRequest request){
+
+		HttpSession session = request.getSession(false);
+    	
+    	if(session == null){
+    		return Response.status(Status.UNAUTHORIZED).entity("認証されていません。").build();
+    	}
+    	
+    	try {
+			DBManager.insertScore(null, 0);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return Response.ok().entity("スコア登録が完了しました。").build();
+    }
+    
   //   /*
   //   * スコア登録
   //   */

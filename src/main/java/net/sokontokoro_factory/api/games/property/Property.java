@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.games.app;
+package net.sokontokoro_factory.api.games.property;
 
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -40,7 +40,10 @@ public class Property {
 			throws ConfigurationException {
 		return getConfiguration().getString("db.password");
 	}
+	// tableとか
 	
-	
-	// Twtter OAuth関連--------------------------------------------
+	public static String scoreTable()
+			throws ConfigurationException {
+		return getConfiguration().getString("db.score.table");
+	}
 }

@@ -7,31 +7,17 @@
 	<display-name>Archetype Created Web Application</display-name>
 	-->
 	<servlet>
-		<servlet-name>GameRankingAPI</servlet-name>
+		<servlet-name>scores</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.games.app</param-value>
-		</init-param>
-	</servlet>
-
-	<servlet>
-		<servlet-name>OAuth</servlet-name>
-		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-		<init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.games.oauth</param-value>
+			<param-value>net.sokontokoro_factory.api.scores</param-value>
 		</init-param>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>GameRankingAPI</servlet-name>
-		<url-pattern>/api/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>OAuth</servlet-name>
-		<url-pattern>/oauth/*</url-pattern>
+		<servlet-name>scores</servlet-name>
+		<url-pattern>/scores/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

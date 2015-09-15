@@ -1,9 +1,3 @@
-/**
-1. 各ゲームのスコア全件取得
-2. 指定ゲームのスコアを登録
-*/
-
-
 package net.sokontokoro_factory.api.games.db;
 
 import java.sql.Connection;
@@ -12,43 +6,37 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import org.apache.log4j.Logger;
+import net.sokontokoro_factory.api.games.property.Property;
 
 public class DBManager{
 
-
-	private static final String URL = "jdbc:mysql://localhost:3306/sokontokoro";
-	private static final String USER = "sokontokoro";
-	private static final String PASSWORD = "sokontokoro_pwd";
-
-	private static final Logger LOGGER = Logger.getLogger(DBManager.class);
-
-
-	/*
-	* Connectionオブジェクトを返す
-	 * 引数：なし
-	*/
+	/**
+	 * Connectionオブジェクトを返す
+	 * @return
+	 * @throws Exception
+	 */
 	private static Connection getConnection() throws Exception{
 
         Connection connection = null;
-
 		try {
 	        Class.forName(Property.DBDriver());
 	        connection = DriverManager.getConnection(Property.DBUrl(), Property.DBUser(), Property.DBPassword());
-
 			return connection;
 		} catch (Exception e) {
-			LOGGER.error("DB接続の初期化に失敗しました。", e);
 			throw e;
 		}
 	}
 
-	/*
+
+	/**
 	 * 全スコアを取得する
-	 * 引数：ゲーム名
+	 * @param game_name
+	 * @return
+	 * @throws Exception
 	 */
 	public static JSONArray getScores(String game_name)throws Exception{
 		StringBuffer sql = new StringBuffer("select * from gamescore where game_name = ");
@@ -69,10 +57,8 @@ public class DBManager{
 				score.put("date", rs.getString("date"));
 				scores.put(score);
 			}
-			LOGGER.info(scores.toString());
 			return scores;
 		} catch (Exception e) {
-			LOGGER.error(e);
 			throw e;
 		} finally {
 			if (connection != null) {
@@ -91,6 +77,23 @@ public class DBManager{
 			}
 		}
 	}
+	
+	
+	public static void insertScore(String gameName, int score) throws Exception{
+		
+		// SQL文生成
+		StringBuffer sql = new StringBuffer();
+		sql.append("insert into ");
+		sql.append(Property.scoreTable());
+//		sql.append(game_name);
+		sql.append("'");
+		
+		PreparedStatement statement = null;
+		Connection connection = getConnection();
+	}
+	
+	
+	
 	// /*
 	//  * スコア登録
 	//  * 引数：ゲーム名、ユーザー名
