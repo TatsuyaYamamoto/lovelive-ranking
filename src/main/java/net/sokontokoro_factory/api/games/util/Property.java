@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.api.games.property;
+package net.sokontokoro_factory.api.games.util;
 
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -23,7 +23,7 @@ public class Property {
 	}
 
 
-	// MySQL関連--------------------------------------------
+	// MySQL connection関連--------------------------------------------
 	public static String DBDriver()
 			throws ConfigurationException {
 		return getConfiguration().getString("db.driver");
@@ -40,7 +40,8 @@ public class Property {
 			throws ConfigurationException {
 		return getConfiguration().getString("db.password");
 	}
-	// tableとか
+
+	// DB SQL　関連-------------------------------------------
 	
 	public static String scoreTable()
 			throws ConfigurationException {

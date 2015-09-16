@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import net.sokontokoro_factory.api.games.db.DBManager;
-import net.sokontokoro_factory.api.games.property.Property;
+import net.sokontokoro_factory.api.games.util.Property;
 
 
 @Path("")
