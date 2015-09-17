@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.api.games.scores;
+package net.sokontokoro_factory.api.game.score;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,12 +12,12 @@ import javax.ws.rs.core.Response.Status;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import net.sokontokoro_factory.api.games.db.DBManager;
-import net.sokontokoro_factory.api.games.util.Property;
+import net.sokontokoro_factory.api.game.util.DBManager;
+import net.sokontokoro_factory.api.game.util.Property;
 
 
 @Path("")
-public class ScoresIndex {
+public class ScoreRestController {
 
     private @Context
     HttpServletRequest req;
@@ -34,15 +34,14 @@ public class ScoresIndex {
       return message;
     }
 
-    /*
-    * スコア取得
-    */
+    // スコア取得
     @Path("/{game_name}")
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getScores(
-    		@PathParam(value = "game_name") String game_name, 
-    		@Context HttpServletRequest request) throws Exception{
+                            @PathParam(value = "game_name") String game_name, 
+                            @Context HttpServletRequest request) 
+                            throws Exception{
 
 		HttpSession session = request.getSession(false);
     	
@@ -55,6 +54,7 @@ public class ScoresIndex {
 
     }
 
+    // スコア登録
     @Path("/{game_name}")
     @POST
     @Consumes("application/json;charset=UTF-8")

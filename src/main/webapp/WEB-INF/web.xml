@@ -7,16 +7,16 @@
 	<display-name>Archetype Created Web Application</display-name>
 	-->
 	<servlet>
-		<servlet-name>scores</servlet-name>
+		<servlet-name>score</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.scores</param-value>
+			<param-value>net.sokontokoro_factory.api.game.score</param-value>
 		</init-param>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>scores</servlet-name>
+		<servlet-name>score</servlet-name>
 		<url-pattern>/scores/*</url-pattern>
 	</servlet-mapping>
 

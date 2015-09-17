@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.api.games.db;
+package net.sokontokoro_factory.api.game.util;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

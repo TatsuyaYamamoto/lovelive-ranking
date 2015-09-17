@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.api.games.util;
+package net.sokontokoro_factory.api.game.util;
 
 
 import org.apache.commons.configuration.ConfigurationException;
