@@ -1,8 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
 <!DOCTYPE web-app PUBLIC
  "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
+ <web-app>
+-->
 
-<web-app>
+<web-app 
+	version="2.5" 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 	<!--
 	<display-name>Archetype Created Web Application</display-name>
 	-->
@@ -15,9 +23,66 @@
 		</init-param>
 	</servlet>
 
+	<servlet>
+		<servlet-name>ranking</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>net.sokontokoro_factory.api.game.ranking</param-value>
+		</init-param>
+	</servlet>
+	<servlet>
+		<servlet-name>OAuth</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>net.sokontokoro_factory.api.twitter.oauth</param-value>
+		</init-param>
+	</servlet>
+	<servlet>
+		<servlet-name>user</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>net.sokontokoro_factory.api.twitter.user</param-value>
+		</init-param>
+	</servlet>
+
+
+
+
 	<servlet-mapping>
 		<servlet-name>score</servlet-name>
 		<url-pattern>/scores/*</url-pattern>
 	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>ranking</servlet-name>
+		<url-pattern>/ranking/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>OAuth</servlet-name>
+		<url-pattern>/oauth/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/users/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- CROS用filter-->
+	<filter>
+		<filter-name>CorsFilter</filter-name>
+		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+		<init-param>
+			<param-name>cors.allowed.origins</param-name>
+			<param-value>http://diary.sokontokoro-factory.net</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CorsFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
 </web-app>

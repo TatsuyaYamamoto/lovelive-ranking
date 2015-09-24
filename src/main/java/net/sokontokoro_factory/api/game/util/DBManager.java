@@ -10,7 +10,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import net.sokontokoro_factory.api.games.util.Property;
+import net.sokontokoro_factory.api.game.util.Property;
 
 public class DBManager{
 
