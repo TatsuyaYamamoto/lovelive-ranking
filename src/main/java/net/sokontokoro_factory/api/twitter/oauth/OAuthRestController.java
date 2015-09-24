@@ -41,7 +41,7 @@ public class OAuthRestController {
 	@Path("/login")
 	@GET
 	public Response login(
-			@QueryParam("game") String game, 
+			@QueryParam("game_name") String game_name, 
 			@Context HttpServletRequest request) {
 
 		String response = OAuthService.getRequestToken();
@@ -56,7 +56,7 @@ public class OAuthRestController {
 		HttpSession session = request.getSession();
 		session.setAttribute("oauth_token", oauth_token);
 		session.setAttribute("oauth_token_secret", oauth_token_secret);
-		session.setAttribute("logingGame", game);
+		session.setAttribute("logingGame", game_name);
 
 		URI uriRedirect = null;
 		
@@ -78,10 +78,12 @@ public class OAuthRestController {
 	 */
 	@Path("/logout")
 	@GET
-	public Response logout(@Context HttpServletRequest request){
+	public Response logout(
+			@QueryParam("game_name") String game_name,
+			@Context HttpServletRequest request){
 
 		HttpSession session = request.getSession(false);
-		String destination = ORIGIN + "/" + session.getAttribute("logingGame");
+		String destination = ORIGIN + "/" + game_name;
 		if(session != null){
 			session.invalidate();			
 		}

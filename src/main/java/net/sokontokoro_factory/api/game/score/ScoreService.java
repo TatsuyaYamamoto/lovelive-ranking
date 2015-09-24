@@ -132,7 +132,6 @@ public class ScoreService {
 			rs = statement.executeQuery();
 			rs.next();
 			info.put("game_name", rs.getString("game_name"));
-			info.put("category", rs.getString("category"));
 			info.put("user_id", rs.getInt("user_id"));
 			info.put("point", rs.getInt("point"));
 			info.put("create_date", rs.getTimestamp("create_date"));
@@ -176,7 +175,6 @@ public class ScoreService {
 			while (rs.next()) {
 				JSONObject score = new JSONObject();
 				score.put("game_name", rs.getString("game_name"));
-				score.put("category", rs.getString("category"));
 				score.put("user_id", rs.getInt("user_id"));
 				score.put("point", rs.getInt("point"));
 				scores.put(score);

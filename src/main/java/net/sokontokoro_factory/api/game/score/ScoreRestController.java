@@ -167,6 +167,9 @@ public class ScoreRestController {
      * @param request
      * @return
      */
+    
+    //TODO game_nameが任意の文字列を入力された場合のレスポンス
+    
     @Path("/{game_name}/me")
     @GET
     @Produces("application/json;charset=UTF-8")
