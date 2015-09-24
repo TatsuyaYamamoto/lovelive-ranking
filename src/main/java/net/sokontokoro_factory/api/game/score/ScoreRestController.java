@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 @Path("")
@@ -63,7 +64,6 @@ public class ScoreRestController {
         cacheControl.setNoStore(true);
     	
     	int point = score.point;
-    	String category = score.category;
     	int user_id = Integer.parseInt((String) session.getAttribute("user_id"));
 
     	// TODO user_idがセッションから撮れなかった場合の値の確認
@@ -77,7 +77,7 @@ public class ScoreRestController {
     	
     	
     	try {
-			ScoreService.insertScore(game_name, category, user_id, point);
+			ScoreService.insertScore(game_name, user_id, point);
 		} catch (SQLException e) {
 			return Response
 					.status(Status.BAD_REQUEST).entity("SQLみす")
@@ -110,10 +110,6 @@ public class ScoreRestController {
 			@PathParam(value = "game_name") String game_name, 
 			@Context HttpServletRequest request) throws Exception{
     	
-		HttpSession session = request.getSession(false);
-    	if(session == null){
-    		return Response.status(Status.UNAUTHORIZED).entity("認証されていません。").build();
-    	}
     	JSONArray scores;
     	try {
         	scores =  ScoreService.getHigher(game_name, NUMBER_OF_TOP);
@@ -174,7 +170,7 @@ public class ScoreRestController {
     @Path("/{game_name}/me")
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getMyScore(
+    public Response getMyInformation(
     						@PathParam(value = "game_name") String game_name, 
     						@Context HttpServletRequest request){
 
@@ -183,10 +179,10 @@ public class ScoreRestController {
     		return Response.status(Status.UNAUTHORIZED).entity("認証されていません。").build();
     	}
     	int user_id = Integer.parseInt((String) session.getAttribute("user_id"));
-    	JSONArray result = null;
+    	JSONObject result = null;
     	
     	try {
-			result = ScoreService.getMyScore(game_name, user_id);
+			result = ScoreService.getMyInfo(game_name, user_id);
 		} catch (SQLException e) {
 			return Response
         			.status(Status.BAD_REQUEST)

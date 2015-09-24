@@ -33,14 +33,13 @@ public class ScoreService {
 	
 	public static void insertScore(
 								String game_name, 
-								String category,
 								int user_id, 
 								int point)
 								throws SQLException {
 
 		String sql = "INSERT INTO game_score"
-				+ " (game_name, category, user_id, point, create_date,update_date,final_date,count)"
-				+ " VALUES (?,?,?,?,NOW(),NOW(),NOW(),1)"	// 初回登録
+				+ " (game_name, user_id, point, create_date,update_date,final_date,count)"
+				+ " VALUES (?,?,?,NOW(),NOW(),NOW(),1)"	// 初回登録
 				+ " ON DUPLICATE KEY UPDATE"				// ↓2回目以降
 				+ " point = IF(VALUES(point) > point, VALUES(point), point),"
 				+ " update_date = IF(VALUES(point) > point, NOW(), update_date),"
@@ -53,9 +52,8 @@ public class ScoreService {
 		try {
 			statement = connection.prepareStatement(sql);
 			statement.setString(1, game_name);
-			statement.setString(2, category);
-			statement.setInt(3, user_id);
-			statement.setInt(4, point);
+			statement.setInt(2, user_id);
+			statement.setInt(3, point);
 			statement.executeUpdate();
 
 		} catch (SQLException e) {
@@ -84,14 +82,13 @@ public class ScoreService {
 		ResultSet rs = null;
 		Connection connection = getConnection();
 		JSONArray scores = new JSONArray();
-		JSONObject score = new JSONObject();
 		try {
 			statement = connection.prepareStatement(sql);
 			statement.setString(1, game_name);
 			rs = statement.executeQuery();
 			while (rs.next()) {
+				JSONObject score = new JSONObject();
 				score.put("game_name", rs.getString("game_name"));
-				score.put("category", rs.getString("category"));
 				score.put("user_id", rs.getInt("user_id"));
 				score.put("point", rs.getInt("point"));
 				scores.put(score);
@@ -114,35 +111,36 @@ public class ScoreService {
 		}
 		return scores;
 	}
-	public static JSONArray getMyScore(
+	public static JSONObject getMyInfo(
 			String game_name, 
 			int user_id)
 			throws Exception{
 
-		String sql = "select * from game_score where game_name = ? and user_id = ?";
-
+		String sql = "select *, count(*) + 1 as ranking from game_score"
+				+ " where point > (select point from game_score where user_id = ?)"
+				+ " and game_name = ?";
+		
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		Connection connection = getConnection();
-		JSONArray scores = new JSONArray();
-		JSONObject score = new JSONObject();
+		JSONObject info = new JSONObject();
 
 		try {
 			statement = connection.prepareStatement(sql);
-			statement.setString(1, game_name);
-			statement.setInt(2, user_id);
+			statement.setInt(1, user_id);
+			statement.setString(2, game_name);
 			rs = statement.executeQuery();
-			while (rs.next()) {
-				score.put("game_name", rs.getString("game_name"));
-				score.put("category", rs.getString("category"));
-				score.put("user_id", rs.getInt("user_id"));
-				score.put("point", rs.getInt("point"));
-				score.put("create_date", rs.getTimestamp("create_date"));
-				score.put("update_date", rs.getTimestamp("update_date"));
-				score.put("final_date", rs.getTimestamp("final_date"));
-				score.put("count", rs.getInt("count"));
-				scores.put(score);
-			}
+			rs.next();
+			info.put("game_name", rs.getString("game_name"));
+			info.put("category", rs.getString("category"));
+			info.put("user_id", rs.getInt("user_id"));
+			info.put("point", rs.getInt("point"));
+			info.put("create_date", rs.getTimestamp("create_date"));
+			info.put("update_date", rs.getTimestamp("update_date"));
+			info.put("final_date", rs.getTimestamp("final_date"));
+			info.put("count", rs.getInt("count"));
+			info.put("ranking", rs.getInt("ranking"));
+
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -159,24 +157,24 @@ public class ScoreService {
 				}
 			}
 		}
-		return scores;
+		return info;
 	}
 	public static JSONArray getHigher(
 			String game_name, 
 			int NUMBER_OF_TOP)
 			throws Exception{
-		String sql = "select * from game_score where game_name = ? limit ?";
+		String sql = "select * from game_score where game_name = ? ORDER BY point DESC limit ?";
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		Connection connection = getConnection();
 		JSONArray scores = new JSONArray();
-		JSONObject score = new JSONObject();
 		try {
 			statement = connection.prepareStatement(sql);
 			statement.setString(1, game_name);
 			statement.setInt(2, NUMBER_OF_TOP);
 			rs = statement.executeQuery();
 			while (rs.next()) {
+				JSONObject score = new JSONObject();
 				score.put("game_name", rs.getString("game_name"));
 				score.put("category", rs.getString("category"));
 				score.put("user_id", rs.getInt("user_id"));
