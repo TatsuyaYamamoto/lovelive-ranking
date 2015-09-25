@@ -33,6 +33,19 @@ public class OAuthRestController {
 		return Response.ok().entity("test is ok.").build();
 	}
 	
+	
+	@Path("/check")
+	@GET
+	public Response checkIsLogin(
+			@Context HttpServletRequest request){
+		HttpSession session = request.getSession(false);
+
+		if(session != null){
+			return Response.status(Status.REQUEST_TIMEOUT).entity("Your session has timed out.").build();
+		}
+		return Response.ok().entity("Your session is available.").build();
+	}
+	
 	/**
 	 * 
 	 * @param request
