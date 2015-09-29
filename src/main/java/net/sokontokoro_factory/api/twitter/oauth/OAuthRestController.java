@@ -40,7 +40,7 @@ public class OAuthRestController {
 			@Context HttpServletRequest request){
 		HttpSession session = request.getSession(false);
 
-		if(session != null){
+		if(session == null){
 			return Response.status(Status.REQUEST_TIMEOUT).entity("Your session has timed out.").build();
 		}
 		return Response.ok().entity("Your session is available.").build();
@@ -98,7 +98,7 @@ public class OAuthRestController {
 		HttpSession session = request.getSession(false);
 		String destination = ORIGIN + "/" + game_name;
 		if(session != null){
-			session.invalidate();			
+			session.invalidate();
 		}
 
 		URI uriRedirect = null;
@@ -137,24 +137,18 @@ public class OAuthRestController {
 			 * レスポンスボディは
 			 * 「access_token」「access_token_secret」「user_id」「screen_name」「x_auth_expires
 			 * 」 のkeyとvalue
-			String s1 = "Stringクラスは文字列を表します。";
-			String s4 = "クラス";
-	 		if (s1.indexOf(s4) != -1) {
-	 			// 部分一致です
-			}else {
-				// 部分一致ではありません
-			}
 			 */
 			String paramaters = response.replaceAll("&", "=");
 			String[] paramater = paramaters.split("=");
 
 			session.setAttribute("access_token", paramater[1]);
 			session.setAttribute("access_token_secret", paramater[3]);
-			session.setAttribute("user_id", String.valueOf(paramater[5]));	// 数字列なのでStringにキャストする
-
+			session.setAttribute("user_id", paramater[5]);
+			session.setAttribute("screen_name", paramater[7]);
+		}else{
+			session.invalidate();
 		}
-		
-		
+
 		String destination = ORIGIN + "/" + session.getAttribute("logingGame");
 		URI uriRedirect = null;
 		try {

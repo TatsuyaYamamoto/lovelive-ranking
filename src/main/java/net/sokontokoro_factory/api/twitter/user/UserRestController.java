@@ -14,30 +14,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.json.JSONObject;
+
 @Path("")
 public class UserRestController{
 
 	final String ORIGIN = "http://diary.sokontokoro-factory.net";
-	/**
-	 * 
-	 * @param request
-	 * @return
-	 * @throws Exception
-	 */
 
-	@Path("/")// getUserProfile
-	@GET
-	@Produces("application/json;charset=UTF-8")
-	public Response testsura() {
-		return Response.ok().entity("test/ is ok.").build();
-	}
-	
-	@Path("/test")// getUserProfile
-	@GET
-	@Produces("application/json;charset=UTF-8")
-	public Response test() {
-		return Response.ok().entity("users is ok.").build();
-	}
 	
 	/**
 	 * セッション内のuser_idを使って自身のTwitterユーザー情報を取得する
@@ -60,10 +43,6 @@ public class UserRestController{
             
 		if (session == null) {
 			return Response.status(Status.UNAUTHORIZED).entity("UNAUTHORIZED!")
-					.header("Access-Control-Allow-Origin", ORIGIN)
-					.header("Access-Control-Allow-Headers", "*")
-					.header("Access-Control-Allow-Methods", "*")
-					.header("Access-Control-Allow-Credentials", true)
 					.cacheControl(cacheControl)
 					.build();
 		}
@@ -80,11 +59,7 @@ public class UserRestController{
 				"https://api.twitter.com/1.1/users/show.json", 
 				param_query);
 		
-		
 		return Response.ok().entity(data)
-					.header("Access-Control-Allow-Origin", ORIGIN)
-					.header("Access-Control-Allow-Headers", "*")
-					.header("Access-Control-Allow-Methods", "*")
 					.header("Access-Control-Allow-Credentials", true)
 					.cacheControl(cacheControl)
 					.build();

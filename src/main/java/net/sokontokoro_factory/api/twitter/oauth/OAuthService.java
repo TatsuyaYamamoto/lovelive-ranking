@@ -30,7 +30,7 @@ public class OAuthService {
 
 	final static String OAUTH_CONSUMER_KEY = "KP3sQoU9wkwZeAMU5TPjy68Pv";
 	final static String OAUTH_CONSUMER_SECRET = "bsik1rXRsWeunpb0gRAYJDwINI9CwwdTqPDwJXZGD8Bfzcpz92";
-	final static String CALLBACK_TO_SERVER = "http://ec2-54-65-78-59.ap-northeast-1.compute.amazonaws.com:8080/api/oauth/callback";
+	final static String CALLBACK_TO_SERVER = "http://ec2-54-65-78-59.ap-northeast-1.compute.amazonaws.com:8080/api/twitter/oauth/callback";
 	final static String OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
 	final static String OAUTH_VERSION = "1.0";
 	final static String ENDPOINT_TWITTER_ACCESS_TOKEN = "https://api.twitter.com/oauth/access_token";

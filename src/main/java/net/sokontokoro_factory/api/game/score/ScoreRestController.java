@@ -48,6 +48,7 @@ public class ScoreRestController {
     @Path("/{game_name}")
     @POST
     @Consumes("application/json;charset=UTF-8")
+    @Produces("text/plain;charset=UTF-8")
     public Response insertScore(
     						@PathParam(value = "game_name") String game_name, 
     						@Context HttpServletRequest request, 
@@ -91,7 +92,7 @@ public class ScoreRestController {
 		}
     	
     	return Response
-    			.ok().entity("スコア登録が完了しました。(User_id=" + (String)session.getAttribute("user_id") + ")")
+    			.ok().entity("スコア登録が完了しました。(User_id=" + (String)session.getAttribute("user_id") + ", point=" + point + ")")
 				.header("Access-Control-Allow-Credentials", true)
 				.build();
     }

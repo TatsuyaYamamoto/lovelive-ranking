@@ -40,35 +40,46 @@
 		</init-param>
 	</servlet>
 	<servlet>
-		<servlet-name>user</servlet-name>
+		<servlet-name>twitterUser</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
 			<param-value>net.sokontokoro_factory.api.twitter.user</param-value>
 		</init-param>
 	</servlet>
-
+	<servlet>
+		<servlet-name>gameUser</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>net.sokontokoro_factory.api.game.user</param-value>
+		</init-param>
+	</servlet>
 
 
 
 	<servlet-mapping>
 		<servlet-name>score</servlet-name>
-		<url-pattern>/scores/*</url-pattern>
+		<url-pattern>/game/scores/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>ranking</servlet-name>
-		<url-pattern>/ranking/*</url-pattern>
+		<url-pattern>/game/ranking/*</url-pattern>
 	</servlet-mapping>
-
+	<servlet-mapping>
+		<servlet-name>gameUser</servlet-name>
+		<url-pattern>/game/users/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet-mapping>
 		<servlet-name>OAuth</servlet-name>
-		<url-pattern>/oauth/*</url-pattern>
+		<url-pattern>/twitter/oauth/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>user</servlet-name>
-		<url-pattern>/users/*</url-pattern>
+		<servlet-name>twitterUser</servlet-name>
+		<url-pattern>/twitter/users/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- CROS用filter-->

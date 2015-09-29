@@ -116,53 +116,87 @@ public class ScoreService {
 			int user_id)
 			throws Exception{
 
-		String sql = "select *, count(*) + 1 as ranking from game_score"
+		String sql_ranking = "select count(*)+1 as ranking  from game_score"
 				+ " where point > (select point from game_score where user_id = ?)"
 				+ " and game_name = ?";
 		
-		PreparedStatement statement = null;
+		
+		String sql_userInfo = " select * , game_user.user_name from game_score"
+				+ " left join game_user"
+				+ " on game_score.user_id = game_user.user_id"
+				+ " where game_score.user_id = ?"
+				+ " and game_name = ?";
+		
+		PreparedStatement statement_ranking = null;
+		PreparedStatement statement_userInfo = null;
+		Connection connection_ranking = getConnection();
+		Connection connection_userInfo = getConnection();
 		ResultSet rs = null;
-		Connection connection = getConnection();
 		JSONObject info = new JSONObject();
 
 		try {
-			statement = connection.prepareStatement(sql);
-			statement.setInt(1, user_id);
-			statement.setString(2, game_name);
-			rs = statement.executeQuery();
+			statement_ranking = connection_ranking.prepareStatement(sql_ranking);
+			statement_ranking.setInt(1, user_id);
+			statement_ranking.setString(2, game_name);
+			rs = statement_ranking.executeQuery();
 			rs.next();
+			info.put("ranking", rs.getInt("ranking"));
+
+			statement_userInfo = connection_userInfo.prepareStatement(sql_userInfo);
+			statement_userInfo.setInt(1, user_id);
+			statement_userInfo.setString(2, game_name);
+			rs = statement_userInfo.executeQuery();
+			rs.next();			
 			info.put("game_name", rs.getString("game_name"));
+			info.put("user_name", rs.getString("user_name"));
 			info.put("user_id", rs.getInt("user_id"));
 			info.put("point", rs.getInt("point"));
 			info.put("create_date", rs.getTimestamp("create_date"));
 			info.put("update_date", rs.getTimestamp("update_date"));
 			info.put("final_date", rs.getTimestamp("final_date"));
 			info.put("count", rs.getInt("count"));
-			info.put("ranking", rs.getInt("ranking"));
 
 		} catch (SQLException e) {
 			throw e;
 		} finally {
-			if (connection != null) {
+			if (connection_ranking != null) {
 				try {
-					connection.close();
+					connection_ranking.close();
 				} catch (SQLException e) {
 				} // ignore
 			}
-			if (statement != null) {
+			if (connection_userInfo != null) {
 				try {
-					statement.close();
+					connection_userInfo.close();
+				} catch (SQLException e) {
+				} // ignore
+			}
+			if (statement_ranking != null) {
+				try {
+					statement_ranking.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (statement_userInfo != null) {
+				try {
+					statement_userInfo.close();
 				} catch (SQLException e) {
 				}
 			}
 		}
+		
 		return info;
 	}
 	public static JSONArray getHigher(
 			String game_name, 
 			int NUMBER_OF_TOP)
 			throws Exception{
-		String sql = "select * from game_score where game_name = ? ORDER BY point DESC limit ?";
+		String sql = "select *, game_user.user_name from game_score"
+				+ " left join game_user"
+				+ " on game_score.user_id = game_user.user_id"
+				+ " where game_name = ?"
+				+ " ORDER BY point DESC limit ?";
+
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		Connection connection = getConnection();
@@ -175,7 +209,7 @@ public class ScoreService {
 			while (rs.next()) {
 				JSONObject score = new JSONObject();
 				score.put("game_name", rs.getString("game_name"));
-				score.put("user_id", rs.getInt("user_id"));
+				score.put("user_name", rs.getString("user_name"));
 				score.put("point", rs.getInt("point"));
 				scores.put(score);
 			}
