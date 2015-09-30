@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import net.sokontokoro_factory.api.game.util.Property;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -42,7 +41,7 @@ public class ScoreService {
 				+ " VALUES (?,?,?,NOW(),NOW(),NOW(),1)"	// 初回登録
 				+ " ON DUPLICATE KEY UPDATE"				// ↓2回目以降
 				+ " point = IF(VALUES(point) > point, VALUES(point), point),"
-				+ " update_date = IF(VALUES(point) > point, NOW(), update_date),"
+				+ " update_date = IF(VALUES(point) > point, value(update_date), update_date),"
 				+ " final_date = NOW(),"
 				+ " count = count + 1";
 				
@@ -110,6 +109,40 @@ public class ScoreService {
 			}
 		}
 		return scores;
+	}
+	public static JSONObject getTotalNumber(
+			String game_name)
+			throws Exception{
+
+		String sql = "select count(*) from game_score where game_name = ?";
+
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		Connection connection = getConnection();
+		JSONObject result = new JSONObject();
+		try {
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, game_name);
+			rs = statement.executeQuery();
+			rs.next();
+			result.put("count", rs.getInt("count(*)"));
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+				} // ignore
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return result;
 	}
 	public static JSONObject getMyInfo(
 			String game_name, 
@@ -196,7 +229,7 @@ public class ScoreService {
 				+ " on game_score.user_id = game_user.user_id"
 				+ " where game_name = ?"
 				+ " ORDER BY point DESC limit ?";
-
+		
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		Connection connection = getConnection();
@@ -213,7 +246,6 @@ public class ScoreService {
 				score.put("point", rs.getInt("point"));
 				scores.put(score);
 			}
-			return scores;
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -230,6 +262,7 @@ public class ScoreService {
 				}
 			}
 		}
+		return scores;
 	}
 }
 

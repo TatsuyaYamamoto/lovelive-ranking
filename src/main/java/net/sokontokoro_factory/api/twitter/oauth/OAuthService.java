@@ -3,12 +3,9 @@ package net.sokontokoro_factory.api.twitter.oauth;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.UUID;
 

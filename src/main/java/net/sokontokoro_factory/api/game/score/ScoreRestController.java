@@ -161,6 +161,34 @@ public class ScoreRestController {
     	
     	return Response.ok().entity(result.toString()).build();
     }
+
+    @Path("/{game_name}/count")
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response getTotalNumber(
+    						@PathParam(value = "game_name") String game_name, 
+    						@Context HttpServletRequest request){
+
+    	
+    	JSONObject result = null;
+    	try {
+			result = ScoreService.getTotalNumber(game_name);
+		} catch (SQLException e) {
+			return Response
+        			.status(Status.BAD_REQUEST)
+        			.entity("SQLえらー")
+        			.build();
+		}catch (Exception e) {
+			return Response
+        			.status(Status.INTERNAL_SERVER_ERROR)
+        			.entity("登録えらー")
+        			.build();
+		}
+    	
+    	return Response.ok().entity(result.toString()).build();
+    }
+    
+    
     
     /**
      * 
