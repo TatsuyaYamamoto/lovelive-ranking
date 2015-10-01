@@ -9,6 +9,9 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.util.UUID;
 
+import net.sokontokoro_factory.api.util.Property;
+
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -25,14 +28,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class OAuthService {
 
-	final static String OAUTH_CONSUMER_KEY = "KP3sQoU9wkwZeAMU5TPjy68Pv";
-	final static String OAUTH_CONSUMER_SECRET = "bsik1rXRsWeunpb0gRAYJDwINI9CwwdTqPDwJXZGD8Bfzcpz92";
-	final static String CALLBACK_TO_SERVER = "http://ec2-54-65-78-59.ap-northeast-1.compute.amazonaws.com:8080/api/twitter/oauth/callback";
-	final static String OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
-	final static String OAUTH_VERSION = "1.0";
-	final static String ENDPOINT_TWITTER_ACCESS_TOKEN = "https://api.twitter.com/oauth/access_token";
-	final static String ENDPOINT_TWITTER_REQUEST_TOKEN = "https://api.twitter.com/oauth/request_token";
-
 	protected static String getAccessToken(String oauth_token,
 			String oauth_verifier) {
 
@@ -43,7 +38,8 @@ public class OAuthService {
 		try {
 
 			httpClient = HttpClients.createDefault();
-			URI uri = new URI(ENDPOINT_TWITTER_ACCESS_TOKEN);
+
+			URI uri = new URI(Property.ACCESS_TOKEN_URL());
 			HttpPost postMethod = new HttpPost(uri);
 
 			long timestamp = System.currentTimeMillis() / 1000;
@@ -54,18 +50,18 @@ public class OAuthService {
 												timestamp,
 												oauth_token, 
 												"POST", 
-												ENDPOINT_TWITTER_ACCESS_TOKEN);
+												Property.ACCESS_TOKEN_URL());
 
 			StringBuffer authorization = new StringBuffer();
 			authorization.append("OAuth ");
 			authorization.append("oauth_consumer_key=");
-			authorization.append(OAUTH_CONSUMER_KEY);
+			authorization.append(Property.CONSUMER_KEY());
 			authorization.append(", oauth_nonce=");
 			authorization.append(oauth_nonce);
 			authorization.append(", oauth_signature=");
 			authorization.append(signature);
 			authorization.append(", oauth_signature_method=");
-			authorization.append(OAUTH_SIGNATURE_METHOD);
+			authorization.append(Property.SIGNATURE_METHOD());
 			authorization.append(", oauth_timestamp=");
 			authorization.append(timestamp);
 			authorization.append(", oauth_token=");
@@ -73,7 +69,9 @@ public class OAuthService {
 			authorization.append(", oauth_verifier=");
 			authorization.append(oauth_verifier);
 			authorization.append(", oauth_version=");
-			authorization.append(OAUTH_VERSION);
+			authorization.append(Property.SIGNATURE_VERSION());				
+
+
 
 			postMethod.setHeader("Authorization", authorization.toString());
 
@@ -83,6 +81,9 @@ public class OAuthService {
 			// {
 			body = EntityUtils.toString(response.getEntity(), "UTF-8");
 			// }
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -100,24 +101,28 @@ public class OAuthService {
 		String oauth_token_secret = "";
 
 		// キーの作成
-		String key = OAUTH_CONSUMER_SECRET + "&" + oauth_token_secret;
-
+		String key = null;
 		// データの作成
-
-		// パラメータ
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("&oauth_consumer_key=");
-		parameter.append(OAUTH_CONSUMER_KEY);
-		parameter.append("&oauth_nonce=");
-		parameter.append(oauth_nonce);
-		parameter.append("&oauth_signature_method=");
-		parameter.append(OAUTH_SIGNATURE_METHOD);
-		parameter.append("&oauth_timestamp=");
-		parameter.append(timestamp);
-		parameter.append("&oauth_token=");
-		parameter.append(oauth_token);
-		parameter.append("&oauth_version=");
-		parameter.append(OAUTH_VERSION);
+		try{
+			key = Property.CONSUMER_SECRET() + "&" + oauth_token_secret;
+			
+			parameter.append("&oauth_consumer_key=");
+			parameter.append(Property.CONSUMER_KEY());
+			parameter.append("&oauth_nonce=");
+			parameter.append(oauth_nonce);
+			parameter.append("&oauth_signature_method=");
+			parameter.append(Property.SIGNATURE_METHOD());
+			parameter.append("&oauth_timestamp=");
+			parameter.append(timestamp);
+			parameter.append("&oauth_token=");
+			parameter.append(oauth_token);
+			parameter.append("&oauth_version=");
+			parameter.append(Property.SIGNATURE_VERSION());	
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		StringBuffer data = new StringBuffer();
 		try {
@@ -158,35 +163,39 @@ public class OAuthService {
 		try {
 
 			httpClient = HttpClients.createDefault();
-			URI uri = new URI(ENDPOINT_TWITTER_REQUEST_TOKEN);
+			URI uri = new URI(Property.REQUEST_TOKEN_URL());
 			HttpPost postMethod = new HttpPost(uri);
 
 			long timestamp = System.currentTimeMillis() / 1000;
 			String oauth_nonce = UUID.randomUUID().toString();
 			String signature = getRequestSignature(
-												CALLBACK_TO_SERVER,
+												Property.SERVER_ORIGIN() + "/api/twitter/oauth/callback",
 												oauth_nonce, 
 												timestamp, 
 												"POST",
-												ENDPOINT_TWITTER_REQUEST_TOKEN);
+												Property.REQUEST_TOKEN_URL());
 
 			// request header作成
 			StringBuffer authorization = new StringBuffer();
+			
+
 			authorization.append("OAuth ");
 			authorization.append("oauth_callback=");
-			authorization.append(CALLBACK_TO_SERVER);
+			authorization.append(Property.SERVER_ORIGIN() + "/api/twitter/oauth/callback");
 			authorization.append(", oauth_consumer_key=");
-			authorization.append(OAUTH_CONSUMER_KEY);
+			authorization.append(Property.CONSUMER_KEY());
 			authorization.append(", oauth_nonce=");
 			authorization.append(oauth_nonce);
 			authorization.append(", oauth_signature=");
 			authorization.append(signature);
 			authorization.append(", oauth_signature_method=");
-			authorization.append(OAUTH_SIGNATURE_METHOD);
+			authorization.append(Property.SIGNATURE_METHOD());
 			authorization.append(", oauth_timestamp=");
 			authorization.append(timestamp);
 			authorization.append(", oauth_version=");
-			authorization.append(OAUTH_VERSION);
+			authorization.append(Property.SIGNATURE_VERSION());				
+
+
 
 			postMethod.setHeader("Authorization", authorization.toString());
 			response = httpClient.execute(postMethod);
@@ -195,6 +204,9 @@ public class OAuthService {
 			// {
 			body = EntityUtils.toString(response.getEntity(), "UTF-8");
 			// }
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -234,21 +246,28 @@ public class OAuthService {
 											"https://api.twitter.com/1.1/users/show.json", 
 											"user_id=" + user_id);
 			StringBuffer authorization = new StringBuffer();
-			authorization.append("OAuth ");
-			authorization.append("oauth_consumer_key=");
-			authorization.append(OAUTH_CONSUMER_KEY);
-			authorization.append(", oauth_nonce=");
-			authorization.append(oauth_nonce);
-			authorization.append(", oauth_signature=");
-			authorization.append(signature);
-			authorization.append(", oauth_signature_method=");
-			authorization.append(OAUTH_SIGNATURE_METHOD);
-			authorization.append(", oauth_timestamp=");
-			authorization.append(timestamp);
-			authorization.append(", oauth_token=");
-			authorization.append(access_token);
-			authorization.append(", oauth_version=");
-			authorization.append(OAUTH_VERSION);
+			
+			try{
+				authorization.append("OAuth ");
+				authorization.append("oauth_consumer_key=");
+				authorization.append(Property.CONSUMER_KEY());
+				authorization.append(", oauth_nonce=");
+				authorization.append(oauth_nonce);
+				authorization.append(", oauth_signature=");
+				authorization.append(signature);
+				authorization.append(", oauth_signature_method=");
+				authorization.append(Property.SIGNATURE_METHOD());
+				authorization.append(", oauth_timestamp=");
+				authorization.append(timestamp);
+				authorization.append(", oauth_token=");
+				authorization.append(access_token);
+				authorization.append(", oauth_version=");
+				authorization.append(Property.SIGNATURE_VERSION());
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 
 			getMethod.setHeader("Authorization", authorization.toString());
 
@@ -276,24 +295,32 @@ public class OAuthService {
 
 		// キーの作成
 		// oauth_token_secretは空文字可
-		String key = OAUTH_CONSUMER_SECRET + "&";
+		String key = null;
 
 		// データの作成
 
 		// パラメータ
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("oauth_callback=");
-		parameter.append(oauth_callback);
-		parameter.append("&oauth_consumer_key=");
-		parameter.append(OAUTH_CONSUMER_KEY);
-		parameter.append("&oauth_nonce=");
-		parameter.append(oauth_nonce);
-		parameter.append("&oauth_signature_method=");
-		parameter.append(OAUTH_SIGNATURE_METHOD);
-		parameter.append("&oauth_timestamp=");
-		parameter.append(timestamp);
-		parameter.append("&oauth_version=");
-		parameter.append(OAUTH_VERSION);
+
+		try {
+			key = Property.CONSUMER_SECRET() + "&";
+			parameter.append("oauth_callback=");
+			parameter.append(oauth_callback);
+			parameter.append("&oauth_consumer_key=");
+			parameter.append(Property.CONSUMER_KEY());
+			parameter.append("&oauth_nonce=");
+			parameter.append(oauth_nonce);
+			parameter.append("&oauth_signature_method=");
+			parameter.append(Property.SIGNATURE_METHOD());
+			parameter.append("&oauth_timestamp=");
+			parameter.append(timestamp);
+			parameter.append("&oauth_version=");
+			parameter.append(Property.SIGNATURE_VERSION());
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 
 		StringBuffer data = new StringBuffer();
 		try {
@@ -325,27 +352,33 @@ public class OAuthService {
 
 		// キーの作成
 		// oauth_token_secretは空文字可
-		String key = OAUTH_CONSUMER_SECRET + "&" + oauth_token_secret;
+		String key = null;
 
 		// データの作成
 
 		// パラメータ
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("oauth_consumer_key=");
-		parameter.append(OAUTH_CONSUMER_KEY);
-		parameter.append("&oauth_nonce=");
-		parameter.append(oauth_nonce);
-		parameter.append("&oauth_signature_method=");
-		parameter.append(OAUTH_SIGNATURE_METHOD);
-		parameter.append("&oauth_timestamp=");
-		parameter.append(timestamp);
-		parameter.append("&oauth_token=");
-		parameter.append(oauth_token);
-		parameter.append("&oauth_version=");
-		parameter.append(OAUTH_VERSION);
-		parameter.append("&");
-		parameter.append(requestQuery);// has Key and Value
-
+		try{
+			key = Property.CONSUMER_SECRET() + "&" + oauth_token_secret;
+			
+			parameter.append("oauth_consumer_key=");
+			parameter.append(Property.CONSUMER_KEY());
+			parameter.append("&oauth_nonce=");
+			parameter.append(oauth_nonce);
+			parameter.append("&oauth_signature_method=");
+			parameter.append(Property.SIGNATURE_METHOD());
+			parameter.append("&oauth_timestamp=");
+			parameter.append(timestamp);
+			parameter.append("&oauth_token=");
+			parameter.append(oauth_token);
+			parameter.append("&oauth_version=");
+			parameter.append(Property.SIGNATURE_VERSION());
+			parameter.append("&");
+			parameter.append(requestQuery);// has Key and Value	
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		StringBuffer data = new StringBuffer();
 		try {
 			data.append(URLEncoder.encode(requestMethod, "UTF-8"));
@@ -376,21 +409,27 @@ public class OAuthService {
 										String access_token) {
 
 		StringBuffer authorization = new StringBuffer();
-		authorization.append("OAuth ")
+		try{
+			authorization.append("OAuth ")
 			.append("oauth_consumer_key=")
-			.append(OAUTH_CONSUMER_KEY)
+			.append(Property.CONSUMER_KEY())
 			.append(", oauth_nonce=")
 			.append(oauth_nonce)
 			.append(", oauth_signature=")
 			.append(signature)
 			.append(", oauth_signature_method=")
-			.append(OAUTH_SIGNATURE_METHOD)
+			.append(Property.SIGNATURE_METHOD())
 			.append(", oauth_timestamp=")
 			.append(timestamp)
 			.append(", oauth_token=")
 			.append(access_token)
 			.append(", oauth_version=")
-			.append(OAUTH_VERSION);
+			.append(Property.SIGNATURE_VERSION());			
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 
 		return authorization.toString();
 	}
@@ -405,18 +444,27 @@ public class OAuthService {
 									Map<String, String> param_query) {
 
 		/* 1. キーの作成 */
-		String key = OAUTH_CONSUMER_SECRET + "&" + access_token_secret;
+		String key = null;
 
 		/* 2. データの作成 */
 
 		// パラメータ
 		Map<String, String> elements = new TreeMap<String, String>();
-		elements.put("oauth_consumer_key", OAUTH_CONSUMER_KEY);
-		elements.put("oauth_nonce", oauth_nonce);
-		elements.put("oauth_signature_method", OAUTH_SIGNATURE_METHOD);
-		elements.put("oauth_timestamp", timestamp);
-		elements.put("oauth_token", oauth_token);
-		elements.put("oauth_version", OAUTH_VERSION);
+		
+		try{
+			key = Property.CONSUMER_SECRET() + "&" + access_token_secret;
+			
+			elements.put("oauth_consumer_key", Property.CONSUMER_KEY());
+			elements.put("oauth_nonce", oauth_nonce);
+			elements.put("oauth_signature_method", Property.SIGNATURE_METHOD());
+			elements.put("oauth_timestamp", timestamp);
+			elements.put("oauth_token", oauth_token);
+			elements.put("oauth_version", Property.SIGNATURE_VERSION());
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 
 		// param_queryをelementsに格納する
 		for (Map.Entry<String, String> entry : param_query.entrySet()) {

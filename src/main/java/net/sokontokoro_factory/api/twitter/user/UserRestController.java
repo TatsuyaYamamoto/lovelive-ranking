@@ -17,9 +17,6 @@ import javax.ws.rs.core.Response.Status;
 
 @Path("")
 public class UserRestController{
-
-	final String ORIGIN = "http://diary.sokontokoro-factory.net";
-
 	
 	/**
 	 * セッション内のuser_idを使って自身のTwitterユーザー情報を取得する

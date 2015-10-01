@@ -15,6 +15,9 @@ import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import net.sokontokoro_factory.api.util.Property;
+
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpMessage;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -24,12 +27,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 class UserService{
-
-
-	final static String OAUTH_CONSUMER_KEY = "KP3sQoU9wkwZeAMU5TPjy68Pv";
-	final static String OAUTH_CONSUMER_SECRET = "bsik1rXRsWeunpb0gRAYJDwINI9CwwdTqPDwJXZGD8Bfzcpz92";
-	final static String OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
-	final static String OAUTH_VERSION = "1.0";
 
 	protected static String execute(
 								String access_token, 
@@ -116,22 +113,28 @@ class UserService{
 										String access_token){
 
 		StringBuffer authorization = new StringBuffer();
-		authorization
+		try{
+			authorization
 			.append("OAuth ")
 			.append("oauth_consumer_key=")
-			.append(OAUTH_CONSUMER_KEY)
+			.append(Property.CONSUMER_KEY())
 			.append(", oauth_nonce=")
 			.append(oauth_nonce)
 			.append(", oauth_signature=")
 			.append(signature)
 			.append(", oauth_signature_method=")
-			.append(OAUTH_SIGNATURE_METHOD)
+			.append(Property.SIGNATURE_METHOD())
 			.append(", oauth_timestamp=")
 			.append(timestamp)
 			.append(", oauth_token=")
 			.append(access_token)
 			.append(", oauth_version=")
-			.append(OAUTH_VERSION);
+			.append(Property.SIGNATURE_VERSION());			
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 
 		return authorization.toString();
 	}
@@ -148,19 +151,29 @@ class UserService{
 	
 	
 		/* 1. キーの作成 */
-		String key = OAUTH_CONSUMER_SECRET + "&" + access_token_secret;
+		String key = null;
 
 		/* 2. データの作成 */
 
 
 		// パラメータ
 		Map<String, String> elements = new TreeMap<String, String>();
-		elements.put("oauth_consumer_key", OAUTH_CONSUMER_KEY);
-		elements.put("oauth_nonce", oauth_nonce);
-		elements.put("oauth_signature_method", OAUTH_SIGNATURE_METHOD);
-		elements.put("oauth_timestamp", timestamp);
-		elements.put("oauth_token", oauth_token);
-		elements.put("oauth_version", OAUTH_VERSION);
+		
+		
+		try{
+			key = Property.CONSUMER_SECRET() + "&" + access_token_secret;
+			
+			elements.put("oauth_consumer_key", Property.CONSUMER_KEY());
+			elements.put("oauth_nonce", oauth_nonce);
+			elements.put("oauth_signature_method", Property.SIGNATURE_METHOD());
+			elements.put("oauth_timestamp", timestamp);
+			elements.put("oauth_token", oauth_token);
+			elements.put("oauth_version", Property.SIGNATURE_VERSION());			
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 
 		// param_queryをelementsに格納する
 		for (Map.Entry<String, String> entry : param_query.entrySet()) {

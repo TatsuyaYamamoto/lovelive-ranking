@@ -14,16 +14,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.configuration.ConfigurationException;
+
+import net.sokontokoro_factory.api.util.Property;
+
 
 @Path("")
 public class OAuthRestController {
 
-	final String ORIGIN = "http://diary.sokontokoro-factory.net";
-
-	final String ENDPOINT_TWITTER_OAUTH_TOKEN = "https://api.twitter.com/oauth/authenticate";
-	final String QUERY_KEY_TWITTER_OAUTH_TOKEN = "oauth_token=";
-
-	
 	
 	@Path("/")// getUserProfile
 	@GET
@@ -74,10 +72,12 @@ public class OAuthRestController {
 		
 		
 		try {
-			uriRedirect = new URI(ENDPOINT_TWITTER_OAUTH_TOKEN + "?" + QUERY_KEY_TWITTER_OAUTH_TOKEN + oauth_token);
+			uriRedirect = new URI(Property.AUTHENTICATE_URL() + "?oauth_token=" + oauth_token);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch(ConfigurationException e){
+			
 		}
 		// twitter認証画面へリダイレクト
 		return Response.seeOther(uriRedirect).build();
@@ -95,7 +95,6 @@ public class OAuthRestController {
 			@Context HttpServletRequest request){
 
 		HttpSession session = request.getSession(false);
-		String destination = ORIGIN + "/" + game_name;
 		if(session != null){
 			session.invalidate();
 		}
@@ -103,10 +102,13 @@ public class OAuthRestController {
 		URI uriRedirect = null;
 		
 		try {
+			String destination = Property.GAME_CLIENT_ORIGIN() + "/" + game_name;
 			uriRedirect = new URI(destination);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ConfigurationException e){
+			
 		}
 		return Response.seeOther(uriRedirect)
 				.header("Access-Control-Allow-Credentials", true)
@@ -126,7 +128,7 @@ public class OAuthRestController {
 			@QueryParam("oauth_token") String oauth_token,
 			@QueryParam("oauth_verifier") String oauth_verifier,
 			@DefaultValue("default") @QueryParam("denied") String denied,
-			@Context HttpServletRequest request) {
+			@Context HttpServletRequest request){
 		
 		HttpSession session = request.getSession(false);
 		
@@ -148,13 +150,15 @@ public class OAuthRestController {
 			session.invalidate();
 		}
 
-		String destination = ORIGIN + "/" + session.getAttribute("logingGame");
 		URI uriRedirect = null;
 		try {
+			String destination = Property.GAME_CLIENT_ORIGIN() + "/" + session.getAttribute("logingGame");
 			uriRedirect = new URI(destination);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch(ConfigurationException e){
+			
 		}
 		return Response.seeOther(uriRedirect).build();
 	}

@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import net.sokontokoro_factory.api.game.util.Property;
+import net.sokontokoro_factory.api.util.Property;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.json.JSONArray;
@@ -19,8 +19,8 @@ public class ScoreService {
 
         Connection connection = null;
 		try {
-	        Class.forName(Property.DBDriver());
-	        connection = DriverManager.getConnection(Property.DBUrl(), Property.DBUser(), Property.DBPassword());
+	        Class.forName(Property.DB_DRIVER());
+	        connection = DriverManager.getConnection(Property.DB_URL(), Property.DB_USER(), Property.DB_PASSWORD());
 			return connection;
 		} catch (ConfigurationException e){
 		} catch (ClassNotFoundException e){
@@ -40,8 +40,8 @@ public class ScoreService {
 				+ " (game_name, user_id, point, create_date,update_date,final_date,count)"
 				+ " VALUES (?,?,?,NOW(),NOW(),NOW(),1)"	// 初回登録
 				+ " ON DUPLICATE KEY UPDATE"				// ↓2回目以降
+				+ " update_date = IF(VALUES(point) > point, values(update_date), update_date),"
 				+ " point = IF(VALUES(point) > point, VALUES(point), point),"
-				+ " update_date = IF(VALUES(point) > point, value(update_date), update_date),"
 				+ " final_date = NOW(),"
 				+ " count = count + 1";
 				

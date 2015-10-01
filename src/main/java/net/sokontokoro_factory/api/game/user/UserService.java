@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import net.sokontokoro_factory.api.game.util.Property;
+import net.sokontokoro_factory.api.util.Property;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.json.JSONException;
@@ -21,8 +21,8 @@ class UserService{
 
         Connection connection = null;
 		try {
-	        Class.forName(Property.DBDriver());
-	        connection = DriverManager.getConnection(Property.DBUrl(), Property.DBUser(), Property.DBPassword());
+	        Class.forName(Property.DB_DRIVER());
+	        connection = DriverManager.getConnection(Property.DB_URL(), Property.DB_USER(), Property.DB_PASSWORD());
 			return connection;
 		} catch (ConfigurationException e){
 		} catch (ClassNotFoundException e){

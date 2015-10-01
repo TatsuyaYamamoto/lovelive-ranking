@@ -1,10 +1,10 @@
-package net.sokontokoro_factory.api.twitter.util;
+package net.sokontokoro_factory.api.util;
 
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
-public class Properties {
+public class Property {
 
 	private static PropertiesConfiguration config;
 
@@ -22,21 +22,35 @@ public class Properties {
 		return getConfiguration().getString("test.text");
 	}
 
+	// システム関連--------------------------------------------
+	public static String GAME_CLIENT_ORIGIN()
+			throws ConfigurationException {
+		return getConfiguration().getString("game.client.origin");
+	}
+	public static String SERVER_ORIGIN()
+			throws ConfigurationException {
+		return getConfiguration().getString("server.origin");
+	}
+	
+	public static int RANKING_TOP_NUMBER()
+			throws ConfigurationException {
+		return getConfiguration().getInt("ranking.top.number");
+	}
 
 	// MySQL関連--------------------------------------------
-	public static String DBDriver()
+	public static String DB_DRIVER()
 			throws ConfigurationException {
 		return getConfiguration().getString("db.driver");
 	}
-	public static String DBUrl()
+	public static String DB_URL()
 			throws ConfigurationException {
 		return getConfiguration().getString("db.url");
 	}
-	public static String DBUser()
+	public static String DB_USER()
 			throws ConfigurationException {
 		return getConfiguration().getString("db.user");
 	}
-	public static String DBPassword()
+	public static String DB_PASSWORD()
 			throws ConfigurationException {
 		return getConfiguration().getString("db.password");
 	}
@@ -59,22 +73,14 @@ public class Properties {
 	}
 
 	// origin, endpoint--------------------------------------------
-	public static String ORIGIN_PORTAL() throws ConfigurationException{
-		return getConfiguration().getString("origin.portal");
+
+	public static String ACCESS_TOKEN_URL() throws ConfigurationException{
+		return getConfiguration().getString("access.token.URL");
 	}
-	public static String ENDPOINT_APP_REDIRECT() throws ConfigurationException{
-		return getConfiguration().getString("endpoint.app.redirect");
+	public static String REQUEST_TOKEN_URL() throws ConfigurationException{
+		return getConfiguration().getString("request.token.URL");
 	}
-	public static String ENDPOINT_OAUTH_TOKEN() throws ConfigurationException{
-		return getConfiguration().getString("endpoint.oauth.token");
-	}
-	public static String QUERYKEY_OAUTH_TOKEN() throws ConfigurationException{
-		return getConfiguration().getString("queryKey.oauth.token");
-	}
-	public static String ENDPOINT_ACCESS_TOKEN() throws ConfigurationException{
-		return getConfiguration().getString("endpoint.access.token");
-	}
-	public static String ENDPOINT_REQUEST_TOKEN() throws ConfigurationException{
-		return getConfiguration().getString("endpoint.request.token");
+	public static String AUTHENTICATE_URL() throws ConfigurationException{
+		return getConfiguration().getString("authenticate.URLWithKey");
 	}
 }

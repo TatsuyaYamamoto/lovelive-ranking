@@ -15,6 +15,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import net.sokontokoro_factory.api.util.Property;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -22,7 +24,6 @@ import org.json.JSONObject;
 @Path("")
 public class ScoreRestController {
 
-	final String ORIGIN = "http://diary.sokontokoro-factory.net";
 	final static int NUMBER_OF_TOP = 10;
 
 
@@ -113,7 +114,7 @@ public class ScoreRestController {
     	
     	JSONArray scores;
     	try {
-        	scores =  ScoreService.getHigher(game_name, NUMBER_OF_TOP);
+        	scores =  ScoreService.getHigher(game_name, Property.RANKING_TOP_NUMBER());
 		} catch (SQLException e) {
 			return Response
         			.status(Status.BAD_REQUEST)
