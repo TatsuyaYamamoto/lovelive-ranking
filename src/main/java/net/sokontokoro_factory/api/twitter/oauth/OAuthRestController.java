@@ -19,7 +19,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import net.sokontokoro_factory.api.util.Property;
 
 
-@Path("")
+@Path("oauth")
 public class OAuthRestController {
 
 	

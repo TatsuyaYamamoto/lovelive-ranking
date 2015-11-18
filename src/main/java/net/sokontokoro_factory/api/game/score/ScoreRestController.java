@@ -21,7 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-@Path("")
+@Path("scores")
 public class ScoreRestController {
 
     // ゲームの指定なしでスコアは取得できない

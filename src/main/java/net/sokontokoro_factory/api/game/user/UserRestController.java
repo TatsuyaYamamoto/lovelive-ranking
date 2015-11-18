@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONObject;
 
-@Path("")
+@Path("users")
 public class UserRestController{
 	
 	@Path("/me")

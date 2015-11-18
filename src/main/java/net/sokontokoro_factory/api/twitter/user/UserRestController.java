@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 
-@Path("")
+@Path("users")
 public class UserRestController{
 	
 	/**
