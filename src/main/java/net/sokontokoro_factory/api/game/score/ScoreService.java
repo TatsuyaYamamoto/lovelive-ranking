@@ -87,8 +87,6 @@ public class ScoreService {
 			rs = statement.executeQuery();
 			while (rs.next()) {
 				JSONObject score = new JSONObject();
-				score.put("game_name", rs.getString("game_name"));
-				score.put("user_id", rs.getInt("user_id"));
 				score.put("point", rs.getInt("point"));
 				scores.put(score);
 			}
@@ -150,7 +148,7 @@ public class ScoreService {
 			throws Exception{
 
 		String sql_ranking = "select count(*)+1 as ranking  from game_score"
-				+ " where point > (select point from game_score where user_id = ?)"
+				+ " where point > (select point from game_score where user_id = ? and game_name = ?)"
 				+ " and game_name = ?";
 		
 		
@@ -171,6 +169,7 @@ public class ScoreService {
 			statement_ranking = connection_ranking.prepareStatement(sql_ranking);
 			statement_ranking.setInt(1, user_id);
 			statement_ranking.setString(2, game_name);
+			statement_ranking.setString(3, game_name);
 			rs = statement_ranking.executeQuery();
 			rs.next();
 			info.put("ranking", rs.getInt("ranking"));
@@ -184,10 +183,11 @@ public class ScoreService {
 			info.put("user_name", rs.getString("user_name"));
 			info.put("user_id", rs.getInt("user_id"));
 			info.put("point", rs.getInt("point"));
-			info.put("create_date", rs.getTimestamp("create_date"));
-			info.put("update_date", rs.getTimestamp("update_date"));
-			info.put("final_date", rs.getTimestamp("final_date"));
-			info.put("count", rs.getInt("count"));
+// 2015.10の仕様では提供する必要がない情報
+//			info.put("create_date", rs.getTimestamp("create_date"));
+//			info.put("update_date", rs.getTimestamp("update_date"));
+//			info.put("final_date", rs.getTimestamp("final_date"));
+//			info.put("count", rs.getInt("count"));
 
 		} catch (SQLException e) {
 			throw e;

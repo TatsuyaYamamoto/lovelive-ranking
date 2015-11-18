@@ -24,9 +24,6 @@ import org.json.JSONObject;
 @Path("")
 public class ScoreRestController {
 
-	final static int NUMBER_OF_TOP = 10;
-
-
     // ゲームの指定なしでスコアは取得できない
     @Path("")
     @GET
@@ -99,7 +96,7 @@ public class ScoreRestController {
     }
 
     /**
-     * 上位"NUMBER_OF_TOP"のランキング情報を取得
+     * 上位(RANKING_TOP_NUMBER指定)のランキング情報を取得
      * @param game_name
      * @param request
      * @return
@@ -108,7 +105,7 @@ public class ScoreRestController {
     @Path("/{game_name}/ranking")
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getRankingInformation(
+    public Response getHigher(
 			@PathParam(value = "game_name") String game_name, 
 			@Context HttpServletRequest request) throws Exception{
     	
@@ -132,7 +129,7 @@ public class ScoreRestController {
     
     
     /**
-     * 
+     * 全てのゲームスコアを取得する。[{point: hogehoge},....]
      * @param game_name
      * @param request
      * @return
@@ -162,34 +159,6 @@ public class ScoreRestController {
     	
     	return Response.ok().entity(result.toString()).build();
     }
-
-    @Path("/{game_name}/count")
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    public Response getTotalNumber(
-    						@PathParam(value = "game_name") String game_name, 
-    						@Context HttpServletRequest request){
-
-    	
-    	JSONObject result = null;
-    	try {
-			result = ScoreService.getTotalNumber(game_name);
-		} catch (SQLException e) {
-			return Response
-        			.status(Status.BAD_REQUEST)
-        			.entity("SQLえらー")
-        			.build();
-		}catch (Exception e) {
-			return Response
-        			.status(Status.INTERNAL_SERVER_ERROR)
-        			.entity("登録えらー")
-        			.build();
-		}
-    	
-    	return Response.ok().entity(result.toString()).build();
-    }
-    
-    
     
     /**
      * 
