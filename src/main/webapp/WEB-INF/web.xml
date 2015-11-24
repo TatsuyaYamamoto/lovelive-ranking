@@ -19,15 +19,7 @@
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.game.score</param-value>
-		</init-param>
-		<init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.game.ranking</param-value>
-		</init-param>
-		<init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.game.user</param-value>
+			<param-value>net.sokontokoro_factory.api.game.user;net.sokontokoro_factory.api.game.score;net.sokontokoro_factory.api.game.ranking</param-value>
 		</init-param>
 	</servlet>
 
@@ -36,11 +28,7 @@
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.twitter.oauth</param-value>
-		</init-param>
-		<init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.twitter.user</param-value>
+			<param-value>net.sokontokoro_factory.api.twitter.oauth;net.sokontokoro_factory.api.twitter.user</param-value>
 		</init-param>
 	</servlet>
 

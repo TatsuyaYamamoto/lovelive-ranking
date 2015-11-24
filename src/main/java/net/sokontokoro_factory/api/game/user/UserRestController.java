@@ -17,9 +17,21 @@ import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONObject;
 
-@Path("users")
+@Path("/users")
 public class UserRestController{
 	
+	/* リソースビーンズ */
+	public static class UserResource {
+		public int user_id;
+		public String user_name;
+	}
+	
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
 	@Path("/me")
 	@GET
     @Produces("application/json;charset=UTF-8")
@@ -62,7 +74,14 @@ public class UserRestController{
 				.build();
 		
 	}
-
+	
+	/**
+	 * 
+	 * @param request
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
 	@Path("/me")
 	@POST
     @Consumes("application/json;charset=UTF-8")

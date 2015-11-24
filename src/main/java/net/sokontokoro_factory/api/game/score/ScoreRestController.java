@@ -21,8 +21,15 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-@Path("scores")
+@Path("/scores")
 public class ScoreRestController {
+
+	/* リソースビーンズ */
+	public static class ScoreResource {
+		public String game_name;
+		public int user_id;
+		public int point;
+	}
 
     // ゲームの指定なしでスコアは取得できない
     @Path("")

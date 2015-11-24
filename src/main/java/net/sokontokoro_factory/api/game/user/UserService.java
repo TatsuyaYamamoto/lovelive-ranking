@@ -33,7 +33,7 @@ class UserService{
 
 	protected static JSONObject getUserName(int user_id) throws SQLException{
 	
-		String sql = "select * from game_user where user_id = ?";
+		String sql = "select * from user where id = ?";
 							
 		PreparedStatement statement = null;
 		ResultSet rs = null;
@@ -44,8 +44,8 @@ class UserService{
 			statement.setInt(1, user_id);
 			rs = statement.executeQuery();
 			if(rs.next()){
-				userInfo.put("user_id", rs.getInt("user_id"));
-				userInfo.put("user_name", rs.getString("user_name"));				
+				userInfo.put("user_id", rs.getInt("id"));
+				userInfo.put("user_name", rs.getString("name"));				
 			}
 		}catch (JSONException e) {
 			throw e;
@@ -73,10 +73,10 @@ class UserService{
 								String user_name)
 								throws Exception {
 		
-		String sql = "insert into game_user (user_id, user_name, create_date, update_date)"
+		String sql = "insert into user (id, name, create_date, update_date)"
 						+ " values (?, ?, now(), now())"
 						+ " ON DUPLICATE KEY UPDATE"
-						+ " user_name = values(user_name), update_date = now()";
+						+ " name = values(name), update_date = now()";
 									
 		PreparedStatement statement = null;
 		Connection connection = getConnection();

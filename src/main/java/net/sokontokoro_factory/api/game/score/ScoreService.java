@@ -36,7 +36,7 @@ public class ScoreService {
 								int point)
 								throws SQLException {
 
-		String sql = "INSERT INTO game_score"
+		String sql = "INSERT INTO score"
 				+ " (game_name, user_id, point, create_date,update_date,final_date,count)"
 				+ " VALUES (?,?,?,NOW(),NOW(),NOW(),1)"	// 初回登録
 				+ " ON DUPLICATE KEY UPDATE"				// ↓2回目以降
@@ -75,7 +75,7 @@ public class ScoreService {
 								String game_name)
 								throws Exception{
 
-		String sql = "select * from game_score where game_name = ?";
+		String sql = "select * from score where game_name = ?";
 
 		PreparedStatement statement = null;
 		ResultSet rs = null;
@@ -112,7 +112,7 @@ public class ScoreService {
 			String game_name)
 			throws Exception{
 
-		String sql = "select count(*) from game_score where game_name = ?";
+		String sql = "select count(*) from score where game_name = ?";
 
 		PreparedStatement statement = null;
 		ResultSet rs = null;
@@ -147,15 +147,15 @@ public class ScoreService {
 			int user_id)
 			throws Exception{
 
-		String sql_ranking = "select count(*)+1 as ranking  from game_score"
-				+ " where point > (select point from game_score where user_id = ? and game_name = ?)"
+		String sql_ranking = "select count(*)+1 as ranking  from score"
+				+ " where point > (select point from score where user_id = ? and game_name = ?)"
 				+ " and game_name = ?";
 		
 		
-		String sql_userInfo = " select * , game_user.user_name from game_score"
-				+ " left join game_user"
-				+ " on game_score.user_id = game_user.user_id"
-				+ " where game_score.user_id = ?"
+		String sql_userInfo = " select * , user.name as user_name from score"
+				+ " left join user"
+				+ " on score.user_id = user.id"
+				+ " where user_id = ?"
 				+ " and game_name = ?";
 		
 		PreparedStatement statement_ranking = null;
@@ -224,9 +224,9 @@ public class ScoreService {
 			String game_name, 
 			int NUMBER_OF_TOP)
 			throws Exception{
-		String sql = "select *, game_user.user_name from game_score"
-				+ " left join game_user"
-				+ " on game_score.user_id = game_user.user_id"
+		String sql = "select *, user.name as user_name from score"
+				+ " left join user"
+				+ " on score.user_id = user.id"
 				+ " where game_name = ?"
 				+ " ORDER BY point DESC limit ?";
 		
