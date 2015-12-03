@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.TreeMap;
 
-import net.sokontokoro_factory.api.util.Calculation;
+import net.sokontokoro_factory.lib.twitter.util.Calculation;
 import net.sokontokoro_factory.lib.twitter.util.Config;
 
 public class Signature {
