@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.api.twitter.oauth;
+package net.sokontokoro_factory.lib.twitter.oauth.v1;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
