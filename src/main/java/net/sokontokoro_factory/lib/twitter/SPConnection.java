@@ -1,6 +1,7 @@
 package net.sokontokoro_factory.lib.twitter;
 
 import java.net.URI;
+import java.util.HashMap;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -12,12 +13,12 @@ import org.apache.http.util.EntityUtils;
 public class SPConnection {
 	
 	private String endpoint;
-	private String requestHeader;
+	private HashMap<String, String> requestHeaderMap;
 	private String body;
 	
-	public SPConnection(String endpoint, String requestHeader, String body){
+	public SPConnection(String endpoint, HashMap<String, String> requestHeaderMap, String body){
 		this.endpoint = endpoint;
-		this.requestHeader = requestHeader;
+		this.requestHeaderMap = requestHeaderMap;
 		this.body = body;
 	};
 	
@@ -27,11 +28,14 @@ public class SPConnection {
 		String responseBody = "";
 
 		try {
-
-			// Http request
 			httpClient = HttpClients.createDefault();
+			// URL
 			HttpGet httpGet = new HttpGet(new URI(endpoint));
-			httpGet.setHeader("Authorization", requestHeader);
+			// リクエストヘッダ
+			for(String key: requestHeaderMap.keySet()){
+				httpGet.setHeader(key, requestHeaderMap.get(key));				
+			}
+			// 実行
 			response = httpClient.execute(httpGet);
 
 			// if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
@@ -53,10 +57,13 @@ public class SPConnection {
 
 		try {
 			httpClient = HttpClients.createDefault();
-			HttpPost postMethod = new HttpPost(new URI(endpoint));
+			HttpPost httpPost = new HttpPost(new URI(endpoint));
 
-			postMethod.setHeader("Authorization", requestHeader);
-			response = httpClient.execute(postMethod);
+			// リクエストヘッダ
+			for(String key: requestHeaderMap.keySet()){
+				httpPost.setHeader(key, requestHeaderMap.get(key));				
+			}
+			response = httpClient.execute(httpPost);
 
 			// if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
 			// {
@@ -70,4 +77,5 @@ public class SPConnection {
 		}
 		return responseBody;
 	}
+
 }

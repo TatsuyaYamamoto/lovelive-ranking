@@ -1,5 +1,6 @@
 package net.sokontokoro_factory.lib.twitter.restapi;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -12,9 +13,9 @@ public class Executor {
 	
 	private Authorization authorization;
 	private String apiUrl;
-	private TreeMap<String, String> parameterQuery;
+	private HashMap<String, String> parameterQuery;
 
-	public Executor(Authorization authorization, String apiUrl, TreeMap<String, String> parameterQuery){
+	public Executor(Authorization authorization, String apiUrl, HashMap<String, String> parameterQuery){
 		this.authorization = authorization;
 		this.apiUrl = apiUrl;
 		this.parameterQuery = parameterQuery;
@@ -28,7 +29,7 @@ public class Executor {
 		String oauth_nonce = UUID.randomUUID().toString();
 		
 		TreeMap<String,String> element = new TreeMap<String,String>();
-		element.put("oauth_consumer_key", Config.getString("oauth_consumer_key"));
+		element.put("oauth_consumer_key", Config.getString("consumer.key"));
 		element.put("oauth_nonce", oauth_nonce);
 		element.put("oauth_signature_method", "HMAC-SHA1");
 		element.put("oauth_timestamp", timestamp);
@@ -40,15 +41,19 @@ public class Executor {
 						Config.getString("consumer.secret"),
 						authorization.getAccessTokenSecret(), 
 						"GET",
-						endpoint,
+						apiUrl,
 						element);
 
-		// リクエストヘッダー作成
+		// リクエストヘッダー(value)作成
 		element.put("oauth_signature", signature);
+		element.remove("user_id");
 		String requestHeaderAuthorization = getRequestHeaderAuthorization(element);
 
+		// リクエストヘッダを作成
+		HashMap<String, String> requestHeaderMap = new HashMap<String, String>();
+		requestHeaderMap.put("Authorization", requestHeaderAuthorization);
 		// 実行
-		SPConnection connection = new SPConnection(endpoint.toString(), requestHeaderAuthorization ,"");
+		SPConnection connection = new SPConnection(endpoint.toString(), requestHeaderMap ,"");
 		return connection.get();
 	}
 	private String getEndpoint(){
@@ -79,7 +84,7 @@ public class Executor {
 			}
 			requestHeader.append(key);
 			requestHeader.append("=");
-			requestHeader.append(parameterQuery.get(key));
+			requestHeader.append(element.get(key));
 			i++;
 		}
 		
