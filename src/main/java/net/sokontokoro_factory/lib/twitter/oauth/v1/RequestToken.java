@@ -1,5 +1,6 @@
 package net.sokontokoro_factory.lib.twitter.oauth.v1;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -48,7 +49,9 @@ public class RequestToken{
 
 
 	public String request(){
-		SPConnection connection = new SPConnection(ENDPOINT, requestHeaderAuthorization, "");
+		HashMap<String, String> requestHeaderMap = new HashMap<String, String>();
+		requestHeaderMap.put("Authorization", requestHeaderAuthorization);
+		SPConnection connection = new SPConnection(ENDPOINT, requestHeaderMap, "");
 		String responseBody = connection.post();
 		return responseBody;
 	}
