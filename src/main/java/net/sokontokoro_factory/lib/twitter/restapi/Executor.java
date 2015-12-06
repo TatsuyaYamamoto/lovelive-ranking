@@ -2,11 +2,11 @@ package net.sokontokoro_factory.lib.twitter.restapi;
 
 import java.util.HashMap;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import net.sokontokoro_factory.lib.twitter.SPConnection;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.Authorization;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.Signature;
+import net.sokontokoro_factory.lib.twitter.util.Calculation;
 import net.sokontokoro_factory.lib.twitter.util.Config;
 
 public class Executor {
@@ -15,6 +15,9 @@ public class Executor {
 	private String apiUrl;
 	private HashMap<String, String> parameterQuery;
 
+	private static final String OAUTH_VERSION = "1.0";
+	private static final String OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
+	
 	public Executor(Authorization authorization, String apiUrl, HashMap<String, String> parameterQuery){
 		this.authorization = authorization;
 		this.apiUrl = apiUrl;
@@ -25,16 +28,16 @@ public class Executor {
 		String endpoint = getEndpoint();
 				
 		// 署名作成
-		String timestamp = Long.toString(System.currentTimeMillis() / 1000);
-		String oauth_nonce = UUID.randomUUID().toString();
+		String timestamp = Calculation.getOauthTimestamp();
+		String oauth_nonce = Calculation.getOauthNonce();
 		
 		TreeMap<String,String> element = new TreeMap<String,String>();
 		element.put("oauth_consumer_key", Config.getString("consumer.key"));
 		element.put("oauth_nonce", oauth_nonce);
-		element.put("oauth_signature_method", "HMAC-SHA1");
+		element.put("oauth_signature_method", OAUTH_SIGNATURE_METHOD);
 		element.put("oauth_timestamp", timestamp);
 		element.put("oauth_token", authorization.getAccessToken());
-		element.put("oauth_version", "1.0");
+		element.put("oauth_version", OAUTH_VERSION);
 		element.putAll(parameterQuery);
 
 		String signature = Signature.generate(

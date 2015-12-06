@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.api.game.score;
+package net.sokontokoro_factory.api.game.resource;
 
 import java.sql.SQLException;
 
@@ -8,28 +8,25 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import net.sokontokoro_factory.api.util.Property;
+import net.sokontokoro_factory.api.game.form.ScoreForm;
+import net.sokontokoro_factory.api.game.service.ScoreService;
+import net.sokontokoro_factory.api.util.CacheManager;
+import net.sokontokoro_factory.api.util.Config;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-@Path("/scores")
-public class ScoreRestController {
-
-	/* リソースビーンズ */
-	public static class ScoreResource {
-		public String game_name;
-		public int user_id;
-		public int point;
-	}
+@Path("scores")
+public class Score {
+	@Context
+	HttpServletRequest request;
 
     // ゲームの指定なしでスコアは取得できない
     @Path("")
@@ -50,25 +47,19 @@ public class ScoreRestController {
      * @param score
      * @return
      */
-    @Path("/{game_name}")
+    @Path("{game_name}")
     @POST
     @Consumes("application/json;charset=UTF-8")
     @Produces("text/plain;charset=UTF-8")
     public Response insertScore(
-    						@PathParam(value = "game_name") String game_name, 
-    						@Context HttpServletRequest request, 
-    						ScoreResource score){
+    						@PathParam(value = "game_name") String game_name,  
+    						ScoreForm score){
 
     	HttpSession session = request.getSession(false);
     	if(session == null){
     		return Response.status(Status.UNAUTHORIZED).entity("認証されていません。").build();
     	}
 
-		final CacheControl cacheControl = new CacheControl();
-        cacheControl.setNoCache(true);
-        cacheControl.setMustRevalidate(true);
-        cacheControl.setNoStore(true);
-    	
     	int point = score.point;
     	int user_id = Integer.parseInt((String) session.getAttribute("user_id"));
 
@@ -77,7 +68,7 @@ public class ScoreRestController {
         	return Response
         			.status(Status.BAD_REQUEST).entity("00error")
 					.header("Access-Control-Allow-Credentials", true)
-					.cacheControl(cacheControl)
+					.cacheControl(CacheManager.getNoCacheAndStoreControl())
 					.build();
     	}
     	
@@ -113,25 +104,17 @@ public class ScoreRestController {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getHigher(
-			@PathParam(value = "game_name") String game_name, 
-			@Context HttpServletRequest request) throws Exception{
+			@PathParam(value = "game_name") String game_name) throws Exception{
     	
     	JSONArray scores;
     	try {
-        	scores =  ScoreService.getHigher(game_name, Property.RANKING_TOP_NUMBER());
-		} catch (SQLException e) {
-			return Response
-        			.status(Status.BAD_REQUEST)
-        			.entity("SQLえらー")
-        			.build();
-		}catch (Exception e) {
-			return Response
-        			.status(Status.INTERNAL_SERVER_ERROR)
-        			.entity("登録えらー")
-        			.build();
+        	scores =  ScoreService.getHigher(game_name, Config.getInt("ranking.top.number"));
+		}catch(SQLException e){
+			return Response.status(Status.BAD_REQUEST).entity("SQLえらー").build();
+		}catch(Exception e){
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("登録えらー").build();
 		}
     	return Response.ok().entity(scores.toString()).build();
-
     }
     
     
@@ -180,8 +163,7 @@ public class ScoreRestController {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getMyInformation(
-    						@PathParam(value = "game_name") String game_name, 
-    						@Context HttpServletRequest request){
+    						@PathParam(value = "game_name") String game_name){
 
 		HttpSession session = request.getSession(false);
     	if(session == null){

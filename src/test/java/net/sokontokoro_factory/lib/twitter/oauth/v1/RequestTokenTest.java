@@ -16,9 +16,10 @@ public class RequestTokenTest {
 	@Test
 	public void リクエストトークンを取得出来る() throws ConfigurationException{
 		Authorization authorization = new Authorization();
-		RequestToken requestToken = new RequestToken(authorization, "http://ec2-54-65-78-59.ap-northeast-1.compute.amazonaws.com:8080http://ec2-54-65-78-59.ap-northeast-1.compute.amazonaws.com:8080/v1/auth/twitter/callback");
+		RequestToken requestToken = new RequestToken(authorization, "http://ec2-54-65-78-59.ap-northeast-1.compute.amazonaws.com:8080/v1/auth/twitter/callback");
 		
 		String responseBody = requestToken.request();
+		
 		assertTrue(responseBody.contains("oauth_token"));
 		assertTrue(responseBody.contains("oauth_token_secret"));
 		assertTrue(responseBody.contains("oauth_callback_confirmed"));

@@ -19,16 +19,16 @@
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.game.user;net.sokontokoro_factory.api.game.score;net.sokontokoro_factory.api.game.ranking</param-value>
+			<param-value>net.sokontokoro_factory.api.game.resource</param-value>
 		</init-param>
 	</servlet>
 
 	<servlet>
-		<servlet-name>twitterApi</servlet-name>
+		<servlet-name>gameAuth</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>net.sokontokoro_factory.api.twitter.oauth;net.sokontokoro_factory.api.twitter.user</param-value>
+			<param-value>net.sokontokoro_factory.api.auth.resource</param-value>
 		</init-param>
 	</servlet>
 
@@ -36,11 +36,12 @@
 		<servlet-name>gameApi</servlet-name>
 		<url-pattern>/game/*</url-pattern>
 	</servlet-mapping>
-
+	
 	<servlet-mapping>
-		<servlet-name>twitterApi</servlet-name>
-		<url-pattern>/twitter/*</url-pattern>
+		<servlet-name>gameAuth</servlet-name>
+		<url-pattern>/auth/*</url-pattern>
 	</servlet-mapping>
+
 
 	<!-- CROS用filter-->
 	<filter>
@@ -48,7 +49,7 @@
 		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
 		<init-param>
 			<param-name>cors.allowed.origins</param-name>
-			<param-value>http://games.sokontokoro-factory.net, http://diary.sokontokoro-factory.net</param-value>
+			<param-value>http://games.sokontokoro-factory.net, http://dev.sokontokoro-factory.net</param-value>
 		</init-param>
 	</filter>
 	<filter-mapping>
