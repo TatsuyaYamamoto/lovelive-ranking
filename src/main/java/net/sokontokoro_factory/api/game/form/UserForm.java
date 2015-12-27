@@ -1,10 +1,29 @@
 package net.sokontokoro_factory.api.game.form;
 
-import java.sql.Timestamp;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class UserForm {
-	public int user_id;
-	public String user_name;
-	public Timestamp create_date;
-	public Timestamp update_date;
+	
+	@XmlElement(name = "user_id")
+	private int userId;
+	
+	@XmlElement(name = "user_name")
+	private String userName;
+	
+	
+	/* ↓ setter and getter ↓ */
+	public int getUserId() {
+		return userId;
+	}
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 }
