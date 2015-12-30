@@ -9,9 +9,12 @@ import net.sokontokoro_factory.lib.twitter.restapi.Executor;
 
 public class Twitter {
 	Authorization authorization;
-		
-	public Twitter(){
-
+	public Twitter(){}
+	
+	public Twitter(String access_token, String access_token_secret){
+		authorization = new Authorization();
+		authorization.setAccessToken(access_token);
+		authorization.setAccessTokenSecret(access_token_secret);
 	}
 	public Authorization getRequestToken(String oauth_callback){
 		Authorization authorization = new Authorization();
