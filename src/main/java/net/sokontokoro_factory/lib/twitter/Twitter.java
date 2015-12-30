@@ -2,6 +2,8 @@ package net.sokontokoro_factory.lib.twitter;
 
 import java.util.HashMap;
 
+import org.json.JSONObject;
+
 import net.sokontokoro_factory.lib.twitter.oauth.v1.AccessToken;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.Authorization;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.RequestToken;
@@ -38,14 +40,12 @@ public class Twitter {
 		authorization.setAccessTokenResponseBody(responseBody);
 		return authorization;
 	}
-	public String getResource(
-				String access_token, 
-				String sccess_token_secret, 
+	public JSONObject getResource(
 				String apiUrl, 
 				HashMap<String, String> parameterQuery){
 
 		Executor exe = new Executor(authorization, apiUrl, parameterQuery);
-		String resource = exe.get();
+		JSONObject resource = exe.get();
 		
 		return resource;
 		

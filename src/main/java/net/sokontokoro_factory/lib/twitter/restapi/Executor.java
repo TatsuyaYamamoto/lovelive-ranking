@@ -3,6 +3,8 @@ package net.sokontokoro_factory.lib.twitter.restapi;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+import org.json.JSONObject;
+
 import net.sokontokoro_factory.lib.twitter.SPConnection;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.Authorization;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.Signature;
@@ -17,13 +19,20 @@ public class Executor {
 
 	private static final String OAUTH_VERSION = "1.0";
 	private static final String OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
+
+	public Executor(Authorization authorization){
+		this.authorization = authorization;
+	}
 	
-	public Executor(Authorization authorization, String apiUrl, HashMap<String, String> parameterQuery){
+	public Executor(
+			Authorization authorization, 
+			String apiUrl, 
+			HashMap<String, String> parameterQuery){
 		this.authorization = authorization;
 		this.apiUrl = apiUrl;
 		this.parameterQuery = parameterQuery;
 	}
-	public String get(){
+	public JSONObject get(){
 		// エンドポイントの作成
 		String endpoint = getEndpoint();
 				
@@ -57,7 +66,8 @@ public class Executor {
 		requestHeaderMap.put("Authorization", requestHeaderAuthorization);
 		// 実行
 		SPConnection connection = new SPConnection(endpoint.toString(), requestHeaderMap ,"");
-		return connection.get();
+		JSONObject resultJSON = new JSONObject(connection.get());
+		return resultJSON;
 	}
 	private String getEndpoint(){
 		StringBuffer endpoint = new StringBuffer();
