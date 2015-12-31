@@ -5,21 +5,31 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
+import net.sokontokoro_factory.api.game.dto.ScoreDto;
 import net.sokontokoro_factory.api.util.Config;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class ScoreService {
 
-
+	private static final int NUMBER_OF_TOP = Config.getInt("ranking.top.number");
+	
+	/**
+	 * DBconnectionを返す
+	 * @return Connection
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	private static Connection getConnection() throws ClassNotFoundException, SQLException{
-
         Connection connection = null;
 		try {
 	        Class.forName(Config.getString("db.driver"));
-	        connection = DriverManager.getConnection(Config.getString("db.url"), Config.getString("db.user"), Config.getString("db.password"));
+	        connection = DriverManager
+	        				.getConnection(
+	        					Config.getString("db.url"), 
+	        					Config.getString("db.user"), 
+	        					Config.getString("db.password"));
 		} catch (ClassNotFoundException| SQLException e){
 			e.printStackTrace();
 			throw e;
@@ -27,11 +37,19 @@ public class ScoreService {
 		return connection;
 	}
 	
-	
+	/**
+	 * userId, game_name, pointからスコア情報を登録する
+	 * @param game_name
+	 * @param user_id
+	 * @param point
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static void insertScore(
-								String game_name, 
-								int user_id, 
-								int point)throws SQLException, ClassNotFoundException{
+							String game_name, 
+							int user_id, 
+							int point)
+							throws SQLException, ClassNotFoundException{
 
 		String sql = "INSERT INTO score"
 				+ " (game_name, user_id, point, create_date,update_date,final_date,count)"
@@ -54,19 +72,41 @@ public class ScoreService {
 		}
 	}
 
-	public static JSONArray getScores(String game_name)throws SQLException, ClassNotFoundException {
+	/**
+	 * 指定ユーザーのスコア情報(得点、順位)を返す
+	 * @param userId
+	 * @return {user_id: ***, game_name: ***, point: ***}
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
+	public static ArrayList<ScoreDto> getScores(int userId)throws SQLException, ClassNotFoundException {
 
-		String sql = "select * from score where game_name = ?";
-		JSONArray scores = new JSONArray();
+		String sql = "select "
+				+ "*, "
+				+ "(select count(*)+1 as ranking  from score "
+					+ "where point > (select point from score where user_id = ? and game_name = target.game_name) "
+					+ "and game_name = target.game_name) "
+					+ "as ranking "
+				+ "from score target "
+				+ "where user_id = ?";
 		
+		ArrayList<ScoreDto> scores = new ArrayList<ScoreDto>();
 		try(Connection connection = getConnection();
 			PreparedStatement statement = connection.prepareStatement(sql);){
-			statement.setString(1, game_name);
+			statement.setInt(1, userId);
+			statement.setInt(2, userId);
 			try(ResultSet rs = statement.executeQuery();){
 				while (rs.next()) {
-					JSONObject score = new JSONObject();
-					score.put("point", rs.getInt("point"));
-					scores.put(score);
+					ScoreDto score = new ScoreDto();
+					score.setGameName(rs.getString("game_name"));
+					score.setPoint(rs.getInt("point"));
+					score.setCreateDate(rs.getTimestamp("create_date"));
+					score.setUpdateDate(rs.getTimestamp("update_date"));
+					score.setFinalDate(rs.getTimestamp("final_date"));
+					score.setCount(rs.getInt("count"));
+					score.setRanking(rs.getInt("ranking"));
+					
+					scores.add(score);
 				}
 			}
 		}catch(ClassNotFoundException | SQLException e){
@@ -75,101 +115,139 @@ public class ScoreService {
 		}
 		return scores;
 	}
-	public static JSONObject getTotalNumber(String game_name)throws SQLException, ClassNotFoundException {
+	
+	/**
+	 * 指定ユーザー、ゲームの得点を返す
+	 * @param user_id
+	 * @param gameName
+	 * @return	ユーザーが得点を登録済み：scoreDto
+	 * 			ユーザーが得点を未登録：null
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
+	public static ScoreDto getScore(int userId, String gameName)throws SQLException, ClassNotFoundException {
+
+		String sql = 
+				"select *, (select count(*)+1 as ranking"
+					+ " from score"
+					+ " where point > (select point from score where user_id = ? and game_name = target.game_name)"
+					+ " and game_name = target.game_name)as ranking"
+				+ " from score target"
+				+ " where user_id = ?"
+				+ " and game_name = ?";
+		
+		try(Connection connection = getConnection();
+			PreparedStatement statement = connection.prepareStatement(sql);){
+			statement.setInt(1, userId);
+			statement.setInt(2, userId);
+			statement.setString(3, gameName);
+			
+			ScoreDto score = null;
+			
+			try(ResultSet rs = statement.executeQuery();){
+				while(rs.next()){
+					score = new ScoreDto();
+					score.setGameName(rs.getString("game_name"));
+					score.setPoint(rs.getInt("point"));
+					score.setUpdateDate(rs.getTimestamp("update_date"));
+					score.setCount(rs.getInt("count"));
+					score.setRanking(rs.getInt("ranking"));
+				}
+			}
+			
+			return score;
+		}catch(ClassNotFoundException | SQLException e){
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	/**
+	 * 指定したゲームのスコア登録の総人数を返す
+	 * @param game_name
+	 * @return {game_name: ***, count: ***}
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
+	public static int getTotalNumber(String game_name)throws SQLException, ClassNotFoundException {
 
 		String sql = "select count(*) from score where game_name = ?";
-		JSONObject result = new JSONObject();
+		int total;
 		
 		try(Connection connection = getConnection();
 			PreparedStatement statement = connection.prepareStatement(sql);){
 			statement.setString(1, game_name);
 			try(ResultSet rs = statement.executeQuery();){
 				rs.next();
-				result.put("count", rs.getInt("count(*)"));				
+				total = rs.getInt("count(*)");
 			}	
 		}catch(SQLException | ClassNotFoundException e){
 			e.printStackTrace();
 			throw e;
 		}
-		return result;
+		return total;
 	}
-	public static JSONObject getMyInfo(
-			String game_name, 
-			int user_id)
-			throws Exception{
+	
+	/**
+	 * 引数で指定した順位までのランキング情報を返す
+	 * [{game_name: ***, user_name: ***, point: ***}]
+	 * @param game_name
+	 * @param NUMBER_OF_TOP
+	 * @return
+	 * @throws Exception
+	 */
+	public static ArrayList<ScoreDto> getHigher(String gameName) throws SQLException, ClassNotFoundException{
 
-		String sql_getRanking = "select count(*)+1 as ranking  from score"
-				+ " where point > (select point from score where user_id = ? and game_name = ?)"
-				+ " and game_name = ?";
+		String subSql = "(select count(*) from score as targetScore where game_name= ? and targetScore.point > score.point)";
+		/**
+		 * サブクエリ: 同値考慮のカウント
+		 * targetのpointより大きいpointの件数をcountする
+		 * 注意：最小値は0
+		 */
 		
-		
-		String sql_userInfo = " select * , user.name as user_name from score"
-				+ " left join user"
-				+ " on score.user_id = user.id"
-				+ " where user_id = ?"
-				+ " and game_name = ?";
-		JSONObject info = new JSONObject();
-		
-		try(Connection connection = getConnection();
-			PreparedStatement statement_getRanking = connection.prepareStatement(sql_getRanking);
-			PreparedStatement statement_userInfo = connection.prepareStatement(sql_userInfo);){
-			connection.setAutoCommit(false);
-			
-			statement_getRanking.setInt(1, user_id);
-			statement_getRanking.setString(2, game_name);
-			statement_getRanking.setString(3, game_name);
-			try(ResultSet rs_getRanking = statement_getRanking.executeQuery();
-				ResultSet rs_userInfo = statement_userInfo.executeQuery();){
-				
-				rs_getRanking.next();
-				info.put("ranking", rs_getRanking.getInt("ranking"));
-				
-				rs_userInfo.next();			
-				info.put("game_name", rs_userInfo.getString("game_name"));
-				info.put("user_name", rs_userInfo.getString("user_name"));
-				info.put("user_id", rs_userInfo.getInt("user_id"));
-				info.put("point", rs_userInfo.getInt("point"));
-				// 2015.10の仕様では提供する必要がない情報
-//				info.put("create_date", rs.getTimestamp("create_date"));
-//				info.put("update_date", rs.getTimestamp("update_date"));
-//				info.put("final_date", rs.getTimestamp("final_date"));
-//				info.put("count", rs.getInt("count"));
-			
-			}catch(SQLException e){
-				connection.rollback();
-				e.printStackTrace();
-				throw e;	
-			}
-			connection.commit();
-		}
-		return info;
-	}
-	public static JSONArray getHigher(
-			String game_name, 
-			int NUMBER_OF_TOP)
-			throws Exception{
-		String sql = "select *, user.name as user_name from score"
-				+ " left join user"
-				+ " on score.user_id = user.id"
+		String sql = "select score.user_id, user.name as user_name, score.point, " + subSql + " + 1 as ranking"
+				+ " from score left join user on score.user_id = user.id"
 				+ " where game_name = ?"
-				+ " ORDER BY point DESC limit ?";
-		JSONArray scores = new JSONArray();
+				+ " and point in (select distinct point from (select distinct point from score where game_name = ? ORDER BY point DESC) as table1)"
+				+ " and " + subSql +" < ?"
+				+ " order by point desc";
+		/**
+		 * 1. user_id, user_name, point, rankingカウント(最小値0考慮)を表示する
+		 * 2. userIdをkeyにscore tableとuser tableをleft joinする
+		 * 3. 条件１：ゲーム
+		 * 4. 条件２；
+		 * 5. 条件３：同値考慮のランキングを?まで表示する(最小値が0なので、?の値を含む条件になる)
+		 * 6. 降順で表示する
+		 */
+		
+		
 		
 		try(Connection connection = getConnection();
 			PreparedStatement statement = connection.prepareStatement(sql);){
-			statement.setString(1, game_name);
-			statement.setInt(2, NUMBER_OF_TOP);
+
+			ArrayList<ScoreDto> scores = new ArrayList<ScoreDto>();
+			
+			statement.setString(1, gameName);
+			statement.setString(2, gameName);
+			statement.setString(3, gameName);
+			statement.setString(4, gameName);
+			statement.setInt(5, NUMBER_OF_TOP);
 			try(ResultSet rs = statement.executeQuery();){
+
 				while (rs.next()) {
-					JSONObject score = new JSONObject();
-					score.put("game_name", rs.getString("game_name"));
-					score.put("user_name", rs.getString("user_name"));
-					score.put("point", rs.getInt("point"));
-					scores.put(score);
+					ScoreDto score = new ScoreDto();
+					score.setUserName(rs.getString("user_name"));
+					score.setUserId(rs.getInt("user_id"));
+					score.setPoint(rs.getInt("point"));
+					score.setRanking(rs.getInt("ranking"));
+					scores.add(score);
 				}		
 			}
+			return scores;
+
+		}catch(SQLException | ClassNotFoundException e){
+			e.printStackTrace();
+			throw e;	
 		}
-		return scores;
 	}
 }
 

@@ -1,16 +1,16 @@
 package net.sokontokoro_factory.api.game.service;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import net.sokontokoro_factory.api.game.dto.UserDto;
 import net.sokontokoro_factory.api.util.Config;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.json.JSONObject;
-
 
 public class UserService{
 
@@ -33,64 +33,102 @@ public class UserService{
 		}
 		return connection;
 	}
-
+	
 	/**
-	 * 指定したuser_idに対するuser_nameを取得する。
-	 * @param user_id
-	 * @return JSONObject {user_id:***, user_name: ***}
+	 * 登録されているユーザーアカウントのステータスを確認する
+	 * 登録済み：true
+	 * 削除済み or 未登録：false
+	 * @param user
+	 * @return
 	 * @throws SQLException
 	 */
-	public static JSONObject getUserName(int user_id) throws SQLException{
-	
+	public static boolean isValidId(int userId){
 		String sql = "select * from user where id = ?";
-		JSONObject userInfo = new JSONObject();
+		boolean validation = false;
 		
 		try(Connection connection = getConnection();
 			PreparedStatement statement = connection.prepareStatement(sql);){
-			statement.setInt(1, user_id);
+			statement.setInt(1, userId);
 			try(ResultSet rs = statement.executeQuery();){
-				if(rs.next()){
-					userInfo.put("user_id", rs.getInt("id"));
-					userInfo.put("user_name", rs.getString("name"));				
+				while(rs.next()){
+					if(!rs.getBoolean("deleted")){
+						validation = true;
+					}
 				}
-			}catch(SQLException e) {
-				e.printStackTrace();
-				throw e;
 			}
 		}catch(ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
 
-		return userInfo;
+		return validation;
 	}
 	
 	/**
-	 * user_id, user_nameを登録する。user_idが重複していた場合、user_nameを更新する。
-	 * @param user_id
-	 * @param user_name
-	 * @throws Exception
+	 * 指定したuser_idに対するuser情報を取得する。
+	 * @param UserDto idのみ参照
+	 * @return UserDto
+	 * @throws SQLException
 	 */
-	public static JSONObject registration(
-								int user_id,
-								String user_name)
-								throws SQLException, ClassNotFoundException {
-		
-		String sql = "insert into user (id, name, create_date, update_date)"
-						+ " values (?, ?, now(), now())"
-						+ " ON DUPLICATE KEY UPDATE"
-						+ " name = values(name), update_date = now()";
+	public static UserDto getDetail(UserDto user) throws SQLException{
+	
+		String sql = "select * from user where id = ? and deleted != true";
+		UserDto getUser = new UserDto();
 		
 		try(Connection connection = getConnection();
 			PreparedStatement statement = connection.prepareStatement(sql);){
-			connection.setAutoCommit(false);
-			statement.setInt(1, user_id);
-			statement.setString(2, user_name);
-			statement.executeUpdate();
-			connection.commit();
+			statement.setInt(1, user.getId());
+			try(ResultSet rs = statement.executeQuery();){
+				while(rs.next()){
+					getUser.setId(rs.getInt("id"));
+					getUser.setName(rs.getString("name"));
+					getUser.setCreateDate(rs.getTimestamp("create_date"));
+					getUser.setUpdateDate(rs.getTimestamp("update_date"));					
+				}
+			}
 		}catch(ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
-			throw e;
 		}
-		return getUserName(user_id);
+		return getUser;
+	}
+	
+	/**
+	 * ユーザーを登録する
+	 * user_idが重複している場合、name, updateDate, deletedの値が再入力される
+	 * 重複の場合とは、登録済みユーザーによるname更新か、削除済みユーザーのアカウント有効化のとき
+	 * @param 
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 * @throws UnsupportedEncodingException 
+	 */
+	public static UserDto registration(UserDto user)throws ClassNotFoundException, SQLException{
+		String sql = "insert into user (id, name, create_date, update_date)"
+				+ " values (?, ?, now(), now())"
+				+ " ON DUPLICATE KEY UPDATE"
+				+ " name = values(name), update_date = now(), deleted = false";
+		try(Connection connection = getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);){
+				statement.setInt(1, user.getId());
+				statement.setString(2, user.getName());
+				statement.executeUpdate();
+			}catch(ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+				throw e;
+			}
+			return getDetail(user);
+	}
+
+	public static UserDto delete(UserDto deleteUser) throws SQLException, ClassNotFoundException{
+		String sql = "update user set deleted = true where id = ?";
+		UserDto deletingUser = getDetail(deleteUser);
+		try(Connection connection = getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);){
+				statement.setInt(1, deleteUser.getId());
+				statement.executeUpdate();
+			}catch(ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+				throw e;
+			}
+		return deletingUser;
 	}
 }
