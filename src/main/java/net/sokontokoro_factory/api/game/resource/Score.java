@@ -130,6 +130,13 @@ public class Score {
     public Response getScores(
     						@PathParam(value = "game_name") String game_name, 
     						@Context HttpServletRequest request){
+    	/*tokenチェック*/
+    	if(score.getSkntktToken().equals(session.getAttribute("skntkt_token"))){
+    		return Response
+    				.status(Status.BAD_REQUEST)
+    				.entity(JSONResponse.message(JSONResponse.INVALID_TOKEN, "please get token again"))
+    				.build();    		
+    	}
 
     	
     	JSONArray result = null;
