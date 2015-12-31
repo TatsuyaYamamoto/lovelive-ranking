@@ -8,31 +8,31 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ScoreDto {
 	
-	@XmlElement
+	@XmlElement(name = "game_name")
 	private String gameName;
 	
-	@XmlElement
+	@XmlElement(name = "user_id")
 	private Integer userId;
 
-	@XmlElement
+	@XmlElement(name = "user_name")
 	private String userName;
 	
-	@XmlElement
+	@XmlElement(name = "point")
 	private Integer point;
 	
-	@XmlElement
+	@XmlElement(name = "create_date")
 	private Timestamp createDate;
 	
-	@XmlElement
+	@XmlElement(name = "update_date")
 	private Timestamp updateDate;
 
-	@XmlElement
+	@XmlElement(name = "final_date")
 	private Timestamp finalDate;
 
-	@XmlElement
+	@XmlElement(name = "count")
 	private Integer count;
 	
-	@XmlElement
+	@XmlElement(name = "ranking")
 	private Integer ranking;
 
 	/* ↓ setter and getter ↓ */

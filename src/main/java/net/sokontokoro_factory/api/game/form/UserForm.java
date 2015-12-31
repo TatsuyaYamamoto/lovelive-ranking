@@ -1,5 +1,6 @@
 package net.sokontokoro_factory.api.game.form;
 
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -10,6 +11,7 @@ public class UserForm {
 	private int userId;
 	
 	@XmlElement(name = "user_name")
+	@Size(min = 1, max = 15)
 	private String userName;
 	
 	
