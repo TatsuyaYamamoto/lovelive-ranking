@@ -2,6 +2,7 @@ package net.sokontokoro_factory.api.auth.resource;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -18,36 +19,17 @@ import org.apache.commons.configuration.ConfigurationException;
 
 import net.sokontokoro_factory.lib.twitter.Twitter;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.Authorization;
+import net.sokontokoro_factory.api.game.dto.UserDto;
+import net.sokontokoro_factory.api.game.service.UserService;
 import net.sokontokoro_factory.api.util.Config;
 
 
 @Path("twitter")
 public class TwitterAuth {
 
-    
-    @Path("")// getUserProfile
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    public Response test() {
-        return Response.ok().entity("Resource is ok.").build();
-    }
-    
-    
-    @Path("check")
-    @GET
-    public Response checkLogin(
-            @Context HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-
-        if(session == null){
-            return Response.status(Status.REQUEST_TIMEOUT).entity("Your session has timed out.").build();
-        }
-        return Response
-        		.ok()
-        		.entity("Your session is available.")
-        		.build();
-    }
-    
+	@Context
+	HttpServletRequest request;
+        
     /**
      * 
      * @param request
@@ -56,32 +38,18 @@ public class TwitterAuth {
      */
     @Path("login")
     @GET
-    public Response login(
-            @QueryParam("game_name") String game_name, 
-            @Context HttpServletRequest request) throws ConfigurationException {
-
-        Twitter twitter = new Twitter();
-        Authorization authorization = twitter.getRequestToken(Config.getString("server.origin") + "/v1/auth/twitter/callback");
-        
+    public Response login(@QueryParam("redirect")String redirect) throws URISyntaxException{
 		HttpSession session = request.getSession();
+		session.setAttribute("redirect", redirect);
+    	
+        Twitter twitter = new Twitter();
+        Authorization authorization = twitter.getRequestToken(Config.getString("server.origin") + "/v1/auth/twitter/callback/");        
 		session.setAttribute("request_token", authorization.getRequestToken());
 		session.setAttribute("request_token_secret", authorization.getRequestTokenSecret());
-		session.setAttribute("logingGame", game_name);
 
-		URI uriRedirect = null;
-		
-		
-		try {
-			uriRedirect = new URI("https://api.twitter.com/oauth/authorize?oauth_token=" + authorization.getRequestToken());
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		// twitter認証画面へリダイレクト
-		return Response
-				.seeOther(uriRedirect)
-				.build();
-
+		URI uriRedirect = new URI("https://api.twitter.com/oauth/authorize?oauth_token=" + authorization.getRequestToken());
+		return Response.seeOther(uriRedirect).build();
     }
     /**
      * twitterの認証完了後のエンドポイント
@@ -91,23 +59,28 @@ public class TwitterAuth {
      * @param request
      * @return
      * @throws ConfigurationException 
+     * @throws SQLException 
+     * @throws ClassNotFoundException 
      */
     @Path("callback")
     @GET
     public Response callback(
             @QueryParam("oauth_token") String request_token,
             @QueryParam("oauth_verifier") String oauth_verifier,
-            @DefaultValue("default") @QueryParam("denied") String denied,
-            @Context HttpServletRequest request) throws ConfigurationException{
+            @DefaultValue("") @QueryParam("denied") String denied
+            ) throws ConfigurationException, URISyntaxException, ClassNotFoundException, SQLException{
         
         HttpSession session = request.getSession(false);
-        
     	if(session == null){
     		return Response.status(Status.UNAUTHORIZED).entity("Unauthorized.Please try to login again, sorry.").build();
     	}
+    	
+    	// リダイレクト用URI
+        URI uriRedirect = new URI(Config.getString("game.client.origin") +"/"+(String)session.getAttribute("redirect"));
         
-        if("default".equals(denied)){
-            Twitter twitter = new Twitter();
+        if(denied.equals("")){
+        //認証許可の場合
+        	Twitter twitter = new Twitter();
             Authorization authorization = twitter.getAccessToken(
             		(String)session.getAttribute("request_token"),
             		(String)session.getAttribute("request_token_secret"),
@@ -116,23 +89,21 @@ public class TwitterAuth {
             session.setAttribute("access_token", authorization.getAccessToken());
             session.setAttribute("access_token_secret", authorization.getAccessTokenSecret());
             session.setAttribute("user_id", authorization.getUserId());
-            session.setAttribute("screen_name", authorization.getScreenName());
+            
+            UserDto user = new UserDto();
+            user.setId(Integer.parseInt(authorization.getUserId()));
+            user.setName(authorization.getScreenName());
+
+            if(!UserService.isValidId(Integer.parseInt(authorization.getUserId()))){
+                // 未登録、削除済みユーザーの場合
+            	UserService.registration(user);
+			}        
             
         }else{
-            session.invalidate();
+        // 認証不許可の場合
+        	session.invalidate();
         }
-
-        URI uriRedirect = null;
-        try {
-            String destination = Config.getString("game.client.origin") + "/" + session.getAttribute("logingGame");
-            uriRedirect = new URI(destination);
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return Response
-        		.seeOther(uriRedirect)
-        		.build();
+        return Response.seeOther(uriRedirect).build();
     }
     /**
      * 
@@ -141,27 +112,13 @@ public class TwitterAuth {
      */
     @Path("logout")
     @GET
-    public Response logout(
-            @QueryParam("game_name") String game_name,
-            @Context HttpServletRequest request){
+    public Response logout(@QueryParam("redirect") String redirect)throws URISyntaxException{
 
         HttpSession session = request.getSession(false);
         if(session != null){
             session.invalidate();
         }
-
-        URI uriRedirect = null;
-        
-        try {
-            String destination = Config.getString("game.client.origin") + "/" + game_name;
-            uriRedirect = new URI(destination);
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return Response
-        		.seeOther(uriRedirect)
-                .header("Access-Control-Allow-Credentials", true)
-                .build();
+        String destination = Config.getString("game.client.origin") + "/" + redirect;
+        return Response.seeOther(new URI(destination)).build();
     }
 }
