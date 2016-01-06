@@ -18,12 +18,12 @@ public class ConfigTest {
 
 	@Test
 	public void keyからStringValueを返す() {
-		String actual = Config.getString("testString");
-		assertThat(actual, is("chunchun"));
+		String actual = Config.getString("test.signature");
+		assertThat(actual, is("ykA6blBRBATy6fYgQP3uXXTqh4s%3D"));
 	}
 	@Test
 	public void keyからintValueを返す() {
-		int actual = Config.getInt("testInt");
-		assertThat(actual, is(123));
+		int actual = Config.getInt("test.id");
+		assertThat(actual, is(298062670));
 	}	
 }

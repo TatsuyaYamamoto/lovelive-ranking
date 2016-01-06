@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import net.sokontokoro_factory.lib.twitter.oauth.v1.Authorization;
 import net.sokontokoro_factory.lib.twitter.util.Config;
 
+import org.json.JSONObject;
 import org.junit.Test;
 
 public class ExecutorTest {
@@ -29,11 +30,11 @@ public class ExecutorTest {
 		Executor exe = new Executor(authorization, apiUrl, parameterQuery);
 
 		// execute
-		String resource = exe.get();
+		JSONObject resource = exe.get();
 		
 		// check
-		assertTrue(resource.contains(Config.getString("test.id")));
-		System.out.println(resource);
+		assertThat(resource.get("id"), is(Config.getInt("test.id")));
+		System.out.println(resource.toString());
 	}
 	
 	@Test
