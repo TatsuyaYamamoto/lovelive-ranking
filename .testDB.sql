@@ -1,8 +1,8 @@
-drop database if exists sokontokoro_game_test;
+drop database if exists sokontokoro_game;
 
-create database sokontokoro_game_test character set utf8;
+create database sokontokoro_game character set utf8;
 
-CREATE TABLE sokontokoro_game_test.score (
+CREATE TABLE sokontokoro_game.score (
 	game_name CHAR(10) NOT NULL, 
 	user_id int NOT NULL, 
 	point int NOT NULL, 
@@ -13,7 +13,7 @@ CREATE TABLE sokontokoro_game_test.score (
 	PRIMARY KEY(game_name, user_id));
 
 
-CREATE TABLE sokontokoro_game_test.user (
+CREATE TABLE sokontokoro_game.user (
 	id int NOT NULL KEY, 
 	name CHAR(16) NOT NULL, 
 	create_date DATETIME NOT NULL, 

@@ -11,3 +11,4 @@ env:
 
 notifications:
     slack: sokontokoro-factory:lLa9IJqbBmKQGVNtKsJvaZnQ
+    slack: 
