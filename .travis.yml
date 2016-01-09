@@ -1,12 +1,13 @@
 language: java
 jdk:
     - oraclejdk8
+services:
+    - mysql
 before_script:
-    - sh -c "if [ '$DB' = 'mysql' ]; then mysql -u root < .testDB.sql; fi"
+    - mysql -u root < .testDB.sql
 after_success:
     - mvn clean test jacoco:report coveralls:report
 env:
-    - DB=mysql
     global:
         secure: "D2B2NAmrVvpM+eydDdq8JlSfxX/0WhlevKLVTb3PWD1zWVGDbfMd00MHnoFNo9ZfchbfFKTA9Uwohl/jNdPXAzJJ7bEv32fdik9k6chV/NJDK+OBjvQDhS7iq/Na8BL1Dng0MCpJ5ktLEyXHmSdoGR3pCBs0mPdiUsTNAOwex/PoRJMM7fCBBFUzJQxwdfZcfA4oFLtDHBXxN9Wg36kt9MsQSKcbMTBLrhzNpn4PEMxqqDNAWNfSD1nuNqUviV5GgJ0XRAVm8NMOawQ3lfIuZu6UihDanmDMhYvgIk4SUaFZHFQhI0RYLrm4V7D37IP5fzvq50fez/eEgi0ljaN9TJwUfXNeMpqw2pLHs77RZlRMxbtHOdgIxphZwxU5SWucjZYYO2flWrmogYNugaFAFvcFCaaqgntiTJ8IvEoUKfwgef4wBpM+BbgxEn4nMy7MSrGQLynkE+tlF1u7PpWc0lYjlrvo7KJ7P3IlMoWpi1bjnycHZ2/KcnZ+C93S0fxOLLUCwJsVK/fPdzBVY0fKfrR57flFUaCi2TLnWxcbzsPL6fYIbZT1Jjb1ITU+5FrHJz5lZupKOyhOihHJPJ0Yo4IWqXKbGsq7rJkEuAU3JO1RRaXSBdOQDK64WBVs+Pu+Vyd7uDdIyifB3i/YszEdbcBJTGeHLoMj3/PdxaYkdTI="
 
