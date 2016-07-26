@@ -11,6 +11,23 @@
 
     <!--/////// DEPENDENCY ///////////////////////////////////////////////-->
     <dependencies>
+        <!--******* LOCAL JAR FILE *************************************************-->
+        <dependency>
+            <groupId>net.sokontokoro_factory</groupId>
+            <artifactId>tweetlyoauth</artifactId>
+            <version>1.0.20160725</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/library/tweetly_oauth-1.0.20160725.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>net.sokontokoro_factory</groupId>
+            <artifactId>yoshinani-util</artifactId>
+            <version>1.0.20160724</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/library/yoshinani-util-1.0.20160724.jar</systemPath>
+        </dependency>
+
+        <!--******* COMPILE SCOPE *************************************************-->
         <!-- jersey servlet -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
