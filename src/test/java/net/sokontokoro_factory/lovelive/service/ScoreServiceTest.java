@@ -1,5 +1,7 @@
 package net.sokontokoro_factory.lovelive.service;
 
+import net.sokontokoro_factory.lovelive.PrivateField;
+import net.sokontokoro_factory.lovelive.TestDatabase;
 import net.sokontokoro_factory.lovelive.TestUtil;
 import net.sokontokoro_factory.lovelive.WeldJUnit4Runner;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
@@ -71,7 +73,7 @@ public class ScoreServiceTest {
         }
 
         // 決められたリスト数のデータを返却している
-        assertThat(actualList.size(), is(TestUtil.getPrivateField(ScoreService.class, "PRODUCE_NUMBER_OF_RANKING")));
+        assertThat(actualList.size(), is(PrivateField.get(ScoreService.class, "PRODUCE_NUMBER_OF_RANKING")));
     }
 
     @Test
@@ -95,17 +97,12 @@ public class ScoreServiceTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception{
-        String[] backupTargetTables = {
-                "USER",
-                "SCORE",
-                "GAME_LOG"
-        };
-        backupFile = TestUtil.createDatabaseBackupFile(backupTargetTables);
+        backupFile = TestDatabase.createBackupFile();
     }
 
     @Before
     public void setUp() throws Exception {
-        TestUtil.importTestDataSet();
+        TestDatabase.importTestDataSet();
     }
 
     @After
@@ -115,6 +112,6 @@ public class ScoreServiceTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestUtil.importBackupFileToDatabase(backupFile);
+        TestDatabase.importBackupFile(backupFile);
     }
 }

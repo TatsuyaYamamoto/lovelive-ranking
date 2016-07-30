@@ -1,7 +1,6 @@
 package net.sokontokoro_factory.lovelive.service;
 
-import net.sokontokoro_factory.lovelive.TestUtil;
-import net.sokontokoro_factory.lovelive.WeldJUnit4Runner;
+import net.sokontokoro_factory.lovelive.TestDatabase;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
 import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
 import net.sokontokoro_factory.lovelive.persistence.facade.UserFacade;
@@ -153,17 +152,12 @@ public class UserServiceTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception{
-        String[] backupTargetTables = {
-                "USER",
-                "SCORE",
-                "GAME_LOG"
-        };
-        backupFile = TestUtil.createDatabaseBackupFile(backupTargetTables);
+        backupFile = TestDatabase.createBackupFile();
     }
 
     @Before
     public void setUp() throws Exception {
-        TestUtil.importTestDataSet();
+        TestDatabase.importTestDataSet();
     }
 
     @After
@@ -173,6 +167,6 @@ public class UserServiceTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestUtil.importBackupFileToDatabase(backupFile);
+        TestDatabase.importBackupFile(backupFile);
     }
 }
