@@ -39,6 +39,12 @@
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>2.23.1</version>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+        </dependency>
+
 
         <!-- CDI container -->
         <dependency>
@@ -123,12 +129,33 @@
             <version>1.1</version>
             <scope>test</scope>
         </dependency>
+
+        <!--CDI test environment-->
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se</artifactId>
             <version>2.3.5.Final</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.cdictrl</groupId>
+            <artifactId>deltaspike-cdictrl-weld</artifactId>
+            <version>1.7.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.modules</groupId>
+            <artifactId>deltaspike-test-control-module-api</artifactId>
+            <version>1.7.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.modules</groupId>
+            <artifactId>deltaspike-test-control-module-impl</artifactId>
+            <version>1.7.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <!--/////// BUILD ///////////////////////////////////////////////-->
