@@ -25,7 +25,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 
 @Path("auth/twitter")
@@ -48,7 +47,7 @@ public class TwitterAuthResource {
     /**
      * ログイン処理を実行する
      *
-     * @param redirectPath　ログイン後のリダイレクト先
+     * @param redirectPath 　ログイン後のリダイレクト先
      * @return
      */
     @Path("login")
@@ -56,7 +55,7 @@ public class TwitterAuthResource {
     public Response login(
             @QueryParam("redirect")
             @DefaultValue("/")
-                    String redirectPath){
+                    String redirectPath) {
 
         TweetlyOAuth tweetlyOAuth = new TweetlyOAuth();
 
@@ -67,9 +66,9 @@ public class TwitterAuthResource {
         logger.info("callback URL after logging:" + callbackUri);
 
         RequestToken token = null;
-        try{
+        try {
             token = tweetlyOAuth.getRequestToken(callbackUri);
-        }catch(TweetlyOAuthException e){
+        } catch (TweetlyOAuthException e) {
             logger.catching(e);
             ErrorDto error = new ErrorDto();
             error.setMessage("faild to access twitter auth providing server");
@@ -78,7 +77,7 @@ public class TwitterAuthResource {
         loginSession.setRedirectPathAfterLogging(redirectPath);
         loginSession.setRequestToken(token);
 
-		// twitter認証画面へリダイレクト
+        // twitter認証画面へリダイレクト
         URI redirect = UriBuilder
                 .fromUri("https://api.twitter.com")
                 .path("oauth")
@@ -100,14 +99,14 @@ public class TwitterAuthResource {
     @Path("callback")
     @GET
     public Response callback(
-            @QueryParam("oauth_token")              String requestToken,
-            @QueryParam("oauth_verifier")           String oauthVerifier,
-            @QueryParam("denied")@DefaultValue("admit")  String denied){
+            @QueryParam("oauth_token") String requestToken,
+            @QueryParam("oauth_verifier") String oauthVerifier,
+            @QueryParam("denied") @DefaultValue("admit") String denied) {
 
         // リクエストトークン取得済み確認
-    	if(loginSession.getRequestToken() == null){
-    		return Response.status(Status.UNAUTHORIZED).entity("Unauthorized.Please try to login again, sorry.").build();
-    	}
+        if (loginSession.getRequestToken() == null) {
+            return Response.status(Status.UNAUTHORIZED).entity("Unauthorized.Please try to login again, sorry.").build();
+        }
 
         URI redirect = UriBuilder
                 .fromUri(GAME_CLIENT_ORIGIN)
@@ -116,7 +115,7 @@ public class TwitterAuthResource {
 
         try {
             // ユーザーが認証許可したか
-            if(denied.equals("admit")){
+            if (denied.equals("admit")) {
                 //認証許可の場合
                 TweetlyOAuth tweetly = new TweetlyOAuth();
                 AccessToken token = tweetly.getAccessToken(loginSession.getRequestToken(), oauthVerifier);
@@ -126,19 +125,19 @@ public class TwitterAuthResource {
                 loginSession.setUserName(token.getScreenName());
 
                 logger.info("loging requesting user admit. user id: " + token.getUserId());
-                try{
+                try {
                     userService.getById(loginSession.getUserId());
-                }catch(NoResourceException notRegisterd) {
+                } catch (NoResourceException notRegisterd) {
                     logger.info("loging requesting user not exist in DB. register!");
                     userService.create(loginSession.getUserId(), loginSession.getUserName());
                 }
 
-            }else{
+            } else {
                 // 認証不許可の場合
                 loginSession.invalidate();
                 logger.info("loging requesting user deny.");
             }
-        }catch(TweetlyOAuthException e){
+        } catch (TweetlyOAuthException e) {
             logger.catching(e);
             ErrorDto error = new ErrorDto();
             error.setMessage("faild to access twitter auth providing server");
@@ -160,7 +159,7 @@ public class TwitterAuthResource {
     public Response logout(
             @QueryParam("redirect")
             @DefaultValue("/")
-                    String redirectPath){
+                    String redirectPath) {
 
         URI redirect = UriBuilder
                 .fromUri(GAME_CLIENT_ORIGIN)
