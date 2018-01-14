@@ -1,9 +1,9 @@
 package net.sokontokoro_factory.lovelive.service;
 
+import com.github.scribejava.core.model.OAuth1AccessToken;
+import com.github.scribejava.core.model.OAuth1RequestToken;
 import lombok.Getter;
 import lombok.Setter;
-import net.sokontokoro_factory.tweetly_oauth.dto.AccessToken;
-import net.sokontokoro_factory.tweetly_oauth.dto.RequestToken;
 
 import javax.enterprise.context.SessionScoped;
 import javax.servlet.http.HttpServletRequest;
@@ -21,11 +21,11 @@ public class LoginSession implements Serializable{
     /* field */
     @Getter
     @Setter
-    RequestToken requestToken;
+    OAuth1RequestToken requestToken;
 
     @Getter
     @Setter
-    AccessToken accessToken;
+    OAuth1AccessToken accessToken;
 
     @Getter
     @Setter

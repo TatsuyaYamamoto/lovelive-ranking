@@ -6,9 +6,9 @@ import net.sokontokoro_factory.lovelive.controller.form.UpdateUserForm;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
 import net.sokontokoro_factory.lovelive.filter.AuthFilter;
 import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
-import net.sokontokoro_factory.lovelive.type.FavoriteType;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
 import net.sokontokoro_factory.lovelive.service.UserService;
+import net.sokontokoro_factory.lovelive.type.FavoriteType;
 import net.sokontokoro_factory.tweetly_oauth.TweetlyOAuthException;
 
 import javax.enterprise.context.RequestScoped;
@@ -16,6 +16,8 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @Path("users")
 @RequestScoped
@@ -48,7 +50,7 @@ public class UserResource {
         String imageUrl = null;
         try{
             imageUrl = userService.getProfileImageUrl(user.getId(), loginSession.getAccessToken());
-        }catch (TweetlyOAuthException ignore){}
+        }catch (IOException | InterruptedException | ExecutionException ignore){}
 
     	/* レスポンス */
         UserDto response = new UserDto();
