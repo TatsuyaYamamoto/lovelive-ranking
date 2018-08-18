@@ -9,16 +9,16 @@ import javax.persistence.Persistence;
 
 public class EntityManagerProducer {
 
-    @Produces
-    @RequestScoped
-    public EntityManager create() {
-        EntityManagerFactory fac = Persistence.createEntityManagerFactory("lovelive_PU");
-        return fac.createEntityManager();
-    }
+  @Produces
+  @RequestScoped
+  public EntityManager create() {
+    EntityManagerFactory fac = Persistence.createEntityManagerFactory("lovelive_PU");
+    return fac.createEntityManager();
+  }
 
-    protected void closeEntityManager(@Disposes EntityManager entityManager) {
-        if (entityManager.isOpen()) {
-            entityManager.close();
-        }
+  protected void closeEntityManager(@Disposes EntityManager entityManager) {
+    if (entityManager.isOpen()) {
+      entityManager.close();
     }
+  }
 }

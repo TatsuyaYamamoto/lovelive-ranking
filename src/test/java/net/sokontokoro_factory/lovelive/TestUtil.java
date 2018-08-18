@@ -1,67 +1,51 @@
 package net.sokontokoro_factory.lovelive;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.dbunit.DatabaseUnitException;
-import org.dbunit.database.DatabaseConnection;
-import org.dbunit.database.IDatabaseConnection;
-import org.dbunit.database.QueryDataSet;
-import org.dbunit.dataset.csv.CsvURLDataSet;
-import org.dbunit.dataset.xml.XmlDataSet;
-import org.dbunit.operation.DatabaseOperation;
-
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestUtil {
 
-    /**
-     * クラス内に定義されたインスタンスのフィールド変数に方に合わせて一時的な値を代入する。
-     * setter, getterカバレッジ用
-     *
-     * @param targetObject
-     * @return
-     * @throws IllegalAccessException
-     */
-    public static List<Method> getAllGetter(Object targetObject) throws IllegalAccessException, IntrospectionException {
-        List<Method> getterMethods = new ArrayList();
+  /**
+   * クラス内に定義されたインスタンスのフィールド変数に方に合わせて一時的な値を代入する。 setter, getterカバレッジ用
+   *
+   * @param targetObject
+   * @return
+   * @throws IllegalAccessException
+   */
+  public static List<Method> getAllGetter(Object targetObject)
+      throws IllegalAccessException, IntrospectionException {
+    List<Method> getterMethods = new ArrayList();
 
-        Field[] allFields = targetObject.getClass().getDeclaredFields();
-        for (Field field : allFields) {
+    Field[] allFields = targetObject.getClass().getDeclaredFields();
+    for (Field field : allFields) {
 
-            // jacocoによるカバレッジリポート用のfieldが挿入されているので、無視する
-            if(!field.getName().equals("$jacocoData")){
-                // getterを取得
-                PropertyDescriptor pd = new PropertyDescriptor(field.getName(), targetObject.getClass());
-                getterMethods.add(pd.getReadMethod());
-            }
-        }
-        return getterMethods;
+      // jacocoによるカバレッジリポート用のfieldが挿入されているので、無視する
+      if (!field.getName().equals("$jacocoData")) {
+        // getterを取得
+        PropertyDescriptor pd = new PropertyDescriptor(field.getName(), targetObject.getClass());
+        getterMethods.add(pd.getReadMethod());
+      }
     }
+    return getterMethods;
+  }
 
-    public static List<Field> getAllField(Object targetObject) throws IllegalAccessException, IntrospectionException {
-        List<Field> fields = new ArrayList();
+  public static List<Field> getAllField(Object targetObject)
+      throws IllegalAccessException, IntrospectionException {
+    List<Field> fields = new ArrayList();
 
-        Field[] allFields = targetObject.getClass().getDeclaredFields();
-        for (Field field : allFields) {
+    Field[] allFields = targetObject.getClass().getDeclaredFields();
+    for (Field field : allFields) {
 
-            // jacocoによるカバレッジリポート用のfieldが挿入されているので、無視する
-            if(
-                    !field.getName().equals("$jacocoData") &&
-                            !field.getName().equals("serialVersionUID")){
-                fields.add(field);
-            }
-        }
-        return fields;
+      // jacocoによるカバレッジリポート用のfieldが挿入されているので、無視する
+      if (!field.getName().equals("$jacocoData") && !field.getName().equals("serialVersionUID")) {
+        fields.add(field);
+      }
     }
+    return fields;
+  }
 }

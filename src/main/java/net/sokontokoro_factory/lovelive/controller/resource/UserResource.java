@@ -1,5 +1,12 @@
 package net.sokontokoro_factory.lovelive.controller.resource;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.controller.dto.UserDto;
 import net.sokontokoro_factory.lovelive.controller.form.UpdateUserForm;
@@ -11,107 +18,93 @@ import net.sokontokoro_factory.lovelive.service.UserService;
 import net.sokontokoro_factory.lovelive.type.FavoriteType;
 import net.sokontokoro_factory.tweetly_oauth.TweetlyOAuthException;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
 @Path("users")
 @RequestScoped
 public class UserResource {
 
-    @Inject
-    UserService userService;
+  @Inject UserService userService;
 
-    @Inject
-    LoginSession loginSession;
+  @Inject LoginSession loginSession;
 
-    /**
-     * ログインアカウントの情報を返す。
-     * user_id, user_nameはsokontokoro-server, iconURLはtwitter server RestAPIへ問い合わせる。
-     *
-     * @return　{user_id:***, user_name: ***, iconURL: ***}
-     * @throws NoResourceException
-     * @throws TweetlyOAuthException
-     */
-    @AuthFilter.LoginRequired
-    @Path("me")
-    @GET
-    @Produces({MediaType.APPLICATION_JSON})
-    public Response getMyInfo() throws NoResourceException{
+  /**
+   * ログインアカウントの情報を返す。 user_id, user_nameはsokontokoro-server, iconURLはtwitter server RestAPIへ問い合わせる。
+   *
+   * @return　{user_id:***, user_name: ***, iconURL: ***}
+   * @throws NoResourceException
+   * @throws TweetlyOAuthException
+   */
+  @AuthFilter.LoginRequired
+  @Path("me")
+  @GET
+  @Produces({MediaType.APPLICATION_JSON})
+  public Response getMyInfo() throws NoResourceException {
 
-        /* execute */
-        UserEntity user = userService.getById(loginSession.getUserId());
+    /* execute */
+    UserEntity user = userService.getById(loginSession.getUserId());
 
-		/* twitterサーバーへの問い合わせ */
-        String imageUrl = null;
-        try{
-            imageUrl = userService.getProfileImageUrl(user.getId(), loginSession.getAccessToken());
-        }catch (IOException | InterruptedException | ExecutionException ignore){}
-
-    	/* レスポンス */
-        UserDto response = new UserDto();
-        response.setId(user.getId());
-        response.setName(user.getName());
-        if(user != null){
-            response.setIconURL(imageUrl);
-        }
-        return Response.ok().entity(response).build();
+    /* twitterサーバーへの問い合わせ */
+    String imageUrl = null;
+    try {
+      imageUrl = userService.getProfileImageUrl(user.getId(), loginSession.getAccessToken());
+    } catch (IOException | InterruptedException | ExecutionException ignore) {
     }
 
-    /**
-     * ユーザー情報をformにしたがって更新する
-     * session取得時にユーザー登録、有効化が実施されている前提
-     *
-     * @param updateUserForm
-     * @return
-     * @throws NoResourceException
-     */
-    @AuthFilter.LoginRequired
-    @Path("me")
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(UpdateUserForm updateUserForm) throws NoResourceException{
+    /* レスポンス */
+    UserDto response = new UserDto();
+    response.setId(user.getId());
+    response.setName(user.getName());
+    if (user != null) {
+      response.setIconURL(imageUrl);
+    }
+    return Response.ok().entity(response).build();
+  }
 
-        FavoriteType favorite = null;
-        // キャラ名の入力チェック
-        if(updateUserForm.getFavorite() != null){
-            favorite = FavoriteType.codeOf(updateUserForm.getFavorite());
-            if(favorite == null){
-                ErrorDto errorDto = new ErrorDto("正しいキャラクター名を指定して下さい");
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorDto).build();
-            }
-        }
+  /**
+   * ユーザー情報をformにしたがって更新する session取得時にユーザー登録、有効化が実施されている前提
+   *
+   * @param updateUserForm
+   * @return
+   * @throws NoResourceException
+   */
+  @AuthFilter.LoginRequired
+  @Path("me")
+  @PUT
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response update(UpdateUserForm updateUserForm) throws NoResourceException {
 
-    	/* execute */
-        userService.update(
-                loginSession.getUserId(),
-                updateUserForm.getUserName(),
-                favorite);
-
-        return Response.ok().build();
+    FavoriteType favorite = null;
+    // キャラ名の入力チェック
+    if (updateUserForm.getFavorite() != null) {
+      favorite = FavoriteType.codeOf(updateUserForm.getFavorite());
+      if (favorite == null) {
+        ErrorDto errorDto = new ErrorDto("正しいキャラクター名を指定して下さい");
+        return Response.status(Response.Status.BAD_REQUEST).entity(errorDto).build();
+      }
     }
 
-    /**
-     * ユーザーを削除する
-     *
-     * @return
-     * @throws NoResourceException
-     */
-    @AuthFilter.LoginRequired
-    @Path("me")
-    @DELETE
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteMyInfo() throws NoResourceException{
+    /* execute */
+    userService.update(loginSession.getUserId(), updateUserForm.getUserName(), favorite);
 
-    	/* execute */
-        userService.delete(loginSession.getUserId());
-        loginSession.invalidate();
+    return Response.ok().build();
+  }
 
-    	/* レスポンス */
-        return Response.noContent().build();
-    }
+  /**
+   * ユーザーを削除する
+   *
+   * @return
+   * @throws NoResourceException
+   */
+  @AuthFilter.LoginRequired
+  @Path("me")
+  @DELETE
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response deleteMyInfo() throws NoResourceException {
+
+    /* execute */
+    userService.delete(loginSession.getUserId());
+    loginSession.invalidate();
+
+    /* レスポンス */
+    return Response.noContent().build();
+  }
 }

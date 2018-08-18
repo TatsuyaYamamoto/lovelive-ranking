@@ -1,32 +1,28 @@
 package net.sokontokoro_factory.lovelive.controller.errorhandling;
 
-import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
-import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import org.json.JSONObject;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
+import org.json.JSONObject;
 
 @Provider
 public class InvalidArgumentExceptionMapper implements ExceptionMapper<InvalidArgumentException> {
 
-	private static final String MESSAGE = "リソースが存在しません";
-	
-    @Override
-    public Response toResponse(InvalidArgumentException exception) {
+  private static final String MESSAGE = "リソースが存在しません";
 
-		JSONObject error = new JSONObject();
-		error.put("code", "-");
-		error.put("messsage", MESSAGE);
-		error.put("messsage_system", exception.getMessage());
+  @Override
+  public Response toResponse(InvalidArgumentException exception) {
 
-		JSONObject response = new JSONObject();
-		response.put("error", error);
+    JSONObject error = new JSONObject();
+    error.put("code", "-");
+    error.put("messsage", MESSAGE);
+    error.put("messsage_system", exception.getMessage());
 
-    	return Response.status(Status.NOT_FOUND)
-    			.entity(response.toString())
-    			.build();
-    }
+    JSONObject response = new JSONObject();
+    response.put("error", error);
+
+    return Response.status(Status.NOT_FOUND).entity(response.toString()).build();
+  }
 }
