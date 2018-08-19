@@ -9,30 +9,30 @@ import lombok.Setter;
 import net.sokontokoro_factory.lovelive.domain.score.Score;
 
 @Entity
-@Table(name = "USER")
+@Table(name = "user")
 @Getter
 public class User {
   @Id private Long id;
 
   @Setter
-  @Column(name = "NAME", nullable = false)
+  @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "CREATE_DATE", nullable = false)
+  @Column(name = "create_date", nullable = false)
   private Long createDate;
 
-  @Column(name = "UPDATE_DATE", nullable = true)
+  @Column(name = "update_date", nullable = true)
   private Long updateDate;
 
   @Setter
-  @Column(name = "FAVORITE", nullable = true)
+  @Column(name = "favorite", nullable = true)
   @Enumerated(EnumType.STRING)
   private FavoriteType favorite;
 
-  @Column(name = "DELETED", nullable = false)
+  @Column(name = "deleted", nullable = false)
   private boolean deleted;
 
-  @Column(name = "ADMIN", nullable = false)
+  @Column(name = "admin", nullable = false)
   private boolean admin;
 
   /** *********************************** relation */

@@ -5,7 +5,7 @@ import lombok.Data;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
 
 @Entity
-@Table(name = "GAME_LOG")
+@Table(name = "game_log")
 @Data
 public class GameLog {
 
@@ -13,32 +13,32 @@ public class GameLog {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @Column(name = "GAME", nullable = false)
+  @Column(name = "game", nullable = false)
   @Enumerated(EnumType.STRING)
   private GameType game;
 
-  @Column(name = "USER_ID")
+  @Column(name = "user_id")
   private Long userId;
 
-  @Column(name = "POINT", nullable = false)
+  @Column(name = "point", nullable = false)
   private Integer point;
 
-  @Column(name = "PLAY_DATE", nullable = false)
+  @Column(name = "play_date", nullable = false)
   private Long playDate;
 
-  @Column(name = "SESSION_ID")
+  @Column(name = "session_id")
   private String sessionId;
 
-  @Column(name = "START_SESSION_DATE")
+  @Column(name = "start_session_date")
   private Long startSessionDate;
 
-  @Column(name = "CLIENT_IP")
+  @Column(name = "client_ip")
   private String clientIp;
 
-  @Column(name = "USER_AGENT")
+  @Column(name = "user_agent")
   private String userAgent;
 
-  @Column(name = "LOCALE")
+  @Column(name = "locale")
   private String locale;
 
   public static GameLog add(

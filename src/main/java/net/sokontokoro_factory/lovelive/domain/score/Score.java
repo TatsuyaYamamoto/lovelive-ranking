@@ -14,7 +14,7 @@ import net.sokontokoro_factory.lovelive.domain.user.User;
  * 9999910の場合、ベストタイムは99999、レベルは易しい、0人抜き 23335の場合、ベストタイムは233、レベルは難しい、5人抜き
  */
 @Entity
-@Table(name = "SCORE")
+@Table(name = "score")
 @Data
 public class Score {
 
@@ -22,30 +22,30 @@ public class Score {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @Column(name = "GAME", nullable = false)
+  @Column(name = "game", nullable = false)
   @Enumerated(EnumType.STRING)
   private GameType game;
 
-  @Column(name = "USER_ID", nullable = false)
+  @Column(name = "user_id", nullable = false)
   private Long userId;
 
-  @Column(name = "POINT", nullable = false)
+  @Column(name = "point", nullable = false)
   private Integer point;
 
-  @Column(name = "CREATE_DATE", nullable = false)
+  @Column(name = "create_date", nullable = false)
   private Long createDate;
 
-  @Column(name = "UPDATE_DATE")
+  @Column(name = "update_date")
   private Long updateDate;
 
-  @Column(name = "FINAL_DATE", nullable = false)
+  @Column(name = "final_date", nullable = false)
   private Long finalDate;
 
-  @Column(name = "COUNT", nullable = false)
+  @Column(name = "count", nullable = false)
   private Integer count;
 
   /** *********************************** relation */
-  @JoinColumn(name = "USER_ID", referencedColumnName = "ID", insertable = false, updatable = false)
+  @JoinColumn(name = "user_id", referencedColumnName = "ID", insertable = false, updatable = false)
   @ManyToOne
   private User user;
 
