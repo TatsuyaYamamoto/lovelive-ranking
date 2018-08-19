@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import net.sokontokoro_factory.lovelive.type.GameType;
+import net.sokontokoro_factory.lovelive.domain.score.GameType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter

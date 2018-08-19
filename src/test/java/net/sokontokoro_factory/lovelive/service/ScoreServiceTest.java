@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import net.sokontokoro_factory.lovelive.TestDatabase;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.persistence.entity.ScoreEntity;
+import net.sokontokoro_factory.lovelive.domain.score.Score;
 import net.sokontokoro_factory.lovelive.persistence.facade.ScoreFacade;
 import net.sokontokoro_factory.lovelive.type.GameType;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
@@ -27,7 +27,7 @@ public class ScoreServiceTest {
   @Test
   public void test_getScore_スコア情報を取得できる() throws Exception {
     long userId = 111111;
-    ScoreEntity actualScore = targetClass.getScore(GameType.HONOCAR, userId);
+    Score actualScore = targetClass.getScore(GameType.HONOCAR, userId);
 
     assertThat(actualScore.getUserId(), is(userId));
   }
@@ -57,20 +57,20 @@ public class ScoreServiceTest {
   @Test
   public void test_getTop_ランキング上位のスコアリストを降順で取得できる() throws Exception {
     int listRenge = 10;
-    List<ScoreEntity> actualList = targetClass.getList(GameType.HONOCAR, 1, listRenge);
+    List<Score> actualList = targetClass.getList(GameType.HONOCAR, 1, listRenge);
 
     long count = 0;
 
     // 降順のリストである
     int preventPoint = Integer.MAX_VALUE;
-    for (ScoreEntity score : actualList) {
+    for (Score score : actualList) {
       assertTrue(preventPoint >= score.getPoint());
       preventPoint = score.getPoint();
     }
 
     // 重複考慮したスコアリストの数を取得する
     preventPoint = Integer.MAX_VALUE;
-    for (ScoreEntity score : actualList) {
+    for (Score score : actualList) {
       if (preventPoint != score.getPoint()) {
         count++;
       }
@@ -85,13 +85,13 @@ public class ScoreServiceTest {
   @Test
   public void test_getRanking_順位を取得できる() throws Exception {
 
-    List<ScoreEntity> all =
+    List<Score> all =
         scoreFacade
             .findAll()
             .stream()
             .filter(score -> !score.getUserEntity().isDeleted())
             .filter(score -> score.getGame() == GameType.HONOCAR)
-            .sorted(comparing(ScoreEntity::getPoint).reversed())
+            .sorted(comparing(Score::getPoint).reversed())
             .collect(Collectors.toList());
 
     // １位

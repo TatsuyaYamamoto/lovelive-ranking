@@ -4,14 +4,15 @@ import static java.util.Comparator.comparing;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+
+import net.sokontokoro_factory.lovelive.domain.score.GameType;
+import net.sokontokoro_factory.lovelive.domain.score.ScoreRepository;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.persistence.ScoreRepository;
-import net.sokontokoro_factory.lovelive.persistence.entity.ScoreEntity;
-import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
-import net.sokontokoro_factory.lovelive.type.GameType;
+import net.sokontokoro_factory.lovelive.domain.score.Score;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +41,13 @@ public class ScoreService {
    * @throws NoResourceException スコアが存在しないとき
    * @throws InvalidArgumentException ユーザーIDが存在しないとき
    */
-  public ScoreEntity getScore(GameType game, long userId)
+  public Score getScore(GameType game, long userId)
       throws NoResourceException, InvalidArgumentException {
-    /* ID確認 */
-    UserEntity user = userService.getById(userId);
-    ScoreEntity score = scoreRepo.findByGameAndUserId(game, userId);
-    if (score == null) {
+    Optional<Score> score = Score.get(scoreRepo, game, userId);
+    if (!score.isPresent()) {
       throw new NoResourceException("スコア未登録です。");
     } else {
-      return score;
+      return score.get();
     }
   }
 
@@ -64,14 +63,11 @@ public class ScoreService {
   public void insertScore(GameType game, long userId, int point)
       throws InvalidArgumentException, NoResourceException {
 
-    /* ID確認 */
-    UserEntity user = userService.getById(userId);
-    ScoreEntity registeredScore = getScore(game, userId);
-
-    if (registeredScore != null) {
-      update(registeredScore, point);
+    Optional<Score> score = Score.get(scoreRepo, game, userId);
+    if (!score.isPresent()) {
+      Score.create(scoreRepo, game, userId, point);
     } else {
-      insert(game, userId, point);
+      score.get().updatePoint(point);
     }
   }
 
@@ -85,11 +81,11 @@ public class ScoreService {
   public Long getRankingNumber(GameType targetGame, int targetPoint) {
     logger.entry("getRanking()", targetGame, targetPoint);
 
-    List<ScoreEntity> allScore = scoreRepo.findAll();
+    List<Score> allScore = scoreRepo.findAll();
     long ranking =
         allScore
                 .stream()
-                .filter(score -> !score.getUserEntity().isDeleted())
+                .filter(score -> !score.getUser().isDeleted())
                 .filter(score -> score.getGame() == targetGame)
                 .filter(score -> score.getPoint() > targetPoint)
                 .count()
@@ -106,20 +102,20 @@ public class ScoreService {
    * @param range 検索するリストの数
    * @return
    */
-  public List<ScoreEntity> getList(GameType targetGame, int offsetRankingNumber, int range) {
+  public List<Score> getList(GameType targetGame, int offsetRankingNumber, int range) {
     logger.entry(targetGame, offsetRankingNumber);
     int offsetBorderPoint = getBorderPoint(targetGame, offsetRankingNumber);
     int limitBorderPoint = getBorderPoint(targetGame, offsetRankingNumber + range);
 
-    List<ScoreEntity> allScore = scoreRepo.findAll();
-    List<ScoreEntity> topScores =
+    List<Score> allScore = scoreRepo.findAll();
+    List<Score> topScores =
         allScore
             .stream()
-            .filter(score -> !score.getUserEntity().isDeleted())
+            .filter(score -> !score.getUser().isDeleted())
             .filter(score -> score.getGame() == targetGame)
             .filter(score -> score.getPoint() <= offsetBorderPoint)
             .filter(score -> score.getPoint() > limitBorderPoint)
-            .sorted(comparing(ScoreEntity::getPoint).reversed())
+            .sorted(comparing(Score::getPoint).reversed())
             .collect(Collectors.toList());
 
     return logger.traceExit(topScores);
@@ -134,7 +130,7 @@ public class ScoreService {
    */
   public int getBorderPoint(GameType targetGame, int targetRankingNumber) {
     logger.entry(targetGame);
-    List<ScoreEntity> allScore = scoreRepo.findAll();
+    List<Score> allScore = scoreRepo.findAll();
 
     List<Integer> descPoints =
         allScore
@@ -158,49 +154,5 @@ public class ScoreService {
     }
     logger.info("game: " + targetGame + ", borderpoint: " + borderPoint);
     return logger.traceExit(borderPoint);
-  }
-
-  /*----------------- ↓ private method ↓ ---------------------*/
-
-  /**
-   * スコアを新規登録する。 gameName、userIdの組み合わせが既存で無いことを確認すること
-   *
-   * @param game
-   * @param userId
-   * @param point
-   */
-  private void insert(GameType game, long userId, int point) {
-    logger.entry(game, userId, point);
-
-    ScoreEntity scoreEntity = new ScoreEntity();
-    scoreEntity.setGame(game);
-    scoreEntity.setUserId(userId);
-    scoreEntity.setPoint(point);
-    scoreEntity.setCount(1);
-    scoreEntity.setCreateDate(System.currentTimeMillis());
-    scoreEntity.setFinalDate(System.currentTimeMillis());
-
-    scoreRepo.save(scoreEntity);
-    logger.traceExit();
-  }
-
-  /**
-   * スコアを更新する
-   *
-   * @param scoreEntity
-   * @param point
-   * @return
-   */
-  private void update(ScoreEntity scoreEntity, int point) {
-    logger.entry(scoreEntity, point);
-
-    if (point > scoreEntity.getPoint()) {
-      scoreEntity.setPoint(point);
-      scoreEntity.setUpdateDate(System.currentTimeMillis());
-    }
-    scoreEntity.setCount(scoreEntity.getCount() + 1);
-    scoreEntity.setFinalDate(System.currentTimeMillis());
-
-    logger.traceExit();
   }
 }

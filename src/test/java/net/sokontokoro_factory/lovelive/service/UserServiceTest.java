@@ -7,9 +7,9 @@ import java.io.File;
 import javax.inject.Inject;
 import net.sokontokoro_factory.lovelive.TestDatabase;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
+import net.sokontokoro_factory.lovelive.domain.user.User;
 import net.sokontokoro_factory.lovelive.persistence.facade.UserFacade;
-import net.sokontokoro_factory.lovelive.type.FavoriteType;
+import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
 import net.sokontokoro_factory.tweetly_oauth.dto.AccessToken;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.*;
@@ -42,7 +42,7 @@ public class UserServiceTest {
   @Test
   public void test_getById_ID検索ができる() throws Exception {
     long userId = 111111;
-    UserEntity actualUser = userService.getById(userId);
+    User actualUser = userService.getById(userId);
     assertThat(actualUser.getId(), is(userId));
   }
 
@@ -76,7 +76,7 @@ public class UserServiceTest {
     String createUserName = "name";
     userService.create(createUserId, createUserName);
 
-    UserEntity createdUser = userFacade.findById(createUserId);
+    User createdUser = userFacade.findById(createUserId);
 
     assertThat(createdUser.getId(), is(createUserId));
     assertThat(createdUser.getName(), is(createUserName));
@@ -91,7 +91,7 @@ public class UserServiceTest {
     userService.create(deletedUserId, createUserName);
 
     // 削除フラグがfalseになっている
-    UserEntity undeletedUser = userFacade.findById(deletedUserId);
+    User undeletedUser = userFacade.findById(deletedUserId);
     assertTrue(!undeletedUser.isDeleted());
   }
 
@@ -115,14 +115,14 @@ public class UserServiceTest {
     long existUserId = 111111;
 
     // 削除されていないユーザー
-    UserEntity existUser = userFacade.findById(existUserId);
+    User existUser = userFacade.findById(existUserId);
     assertTrue(!existUser.isDeleted());
 
     // 実行
     userService.delete(existUserId);
 
     // 削除フラグがtrueになっている
-    UserEntity deletedUser = userFacade.findById(existUserId);
+    User deletedUser = userFacade.findById(existUserId);
     assertTrue(deletedUser.isDeleted());
   }
 

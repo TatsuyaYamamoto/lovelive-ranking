@@ -1,8 +1,11 @@
-package net.sokontokoro_factory.lovelive.persistence.entity;
+package net.sokontokoro_factory.lovelive.domain.score;
 
 import javax.persistence.*;
 import lombok.Data;
-import net.sokontokoro_factory.lovelive.type.GameType;
+import lombok.NonNull;
+import net.sokontokoro_factory.lovelive.domain.user.User;
+
+import java.util.Optional;
 
 /**
  * TODO: スコアの持ち方の再検討 IntegerのPointカラムしかないため、少数、文字列の評価ができない。
@@ -14,7 +17,7 @@ import net.sokontokoro_factory.lovelive.type.GameType;
 @Entity
 @Table(name = "SCORE")
 @Data
-public class ScoreEntity {
+public class Score {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,5 +48,45 @@ public class ScoreEntity {
   /** *********************************** relation */
   @JoinColumn(name = "USER_ID", referencedColumnName = "ID", insertable = false, updatable = false)
   @ManyToOne
-  private UserEntity userEntity;
+  private User user;
+
+  protected Score() {}
+
+  public Score(@NonNull GameType game, long userId, int point) {
+    this.game = game;
+    this.userId = userId;
+    this.point = point;
+    this.count = 1;
+  }
+
+  public static Optional<Score> get(ScoreRepository repo, @NonNull GameType game, long userId) {
+    return repo.findByGameAndUserId(game, userId);
+  }
+
+  public static Score create(ScoreRepository repo, @NonNull GameType game, long userId, int point) {
+    Score score = new Score(game, userId, point);
+    return repo.save(score);
+  }
+
+  public boolean updatePoint(int newPoint) {
+    boolean isUpdated = false;
+    if (this.point < newPoint) {
+      this.point = newPoint;
+      isUpdated = true;
+    }
+    this.count += 1;
+    this.finalDate = System.currentTimeMillis();
+
+    return isUpdated;
+  }
+
+  @PrePersist
+  protected void prePersist() {
+    this.createDate = System.currentTimeMillis();
+  }
+
+  @PreUpdate
+  protected void preUpdate() {
+    this.updateDate = System.currentTimeMillis();
+  }
 }

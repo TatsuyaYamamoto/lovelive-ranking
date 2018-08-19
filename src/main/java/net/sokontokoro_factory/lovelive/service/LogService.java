@@ -2,9 +2,9 @@ package net.sokontokoro_factory.lovelive.service;
 
 import javax.transaction.Transactional;
 
-import net.sokontokoro_factory.lovelive.persistence.GameLogRepository;
-import net.sokontokoro_factory.lovelive.persistence.entity.GameLogEntity;
-import net.sokontokoro_factory.lovelive.type.GameType;
+import net.sokontokoro_factory.lovelive.domain.log.GameLogRepository;
+import net.sokontokoro_factory.lovelive.domain.log.GameLog;
+import net.sokontokoro_factory.lovelive.domain.score.GameType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,18 +35,16 @@ public class LogService {
   public void addGameLog(GameType game, Long userId, int point) {
     logger.entry("add()", game, userId);
 
-    GameLogEntity log = new GameLogEntity();
-    log.setGame(game);
-    log.setUserId(userId);
-    log.setPoint(point);
-    log.setPlayDate(System.currentTimeMillis());
-    log.setSessionId(loginSession.getRequest().getRequestedSessionId());
-    log.setStartSessionDate(loginSession.getRequest().getSession().getCreationTime());
-    log.setClientIp(loginSession.getRequest().getRemoteAddr());
-    log.setUserAgent(loginSession.getRequest().getHeader("user-agent"));
-    log.setLocale(loginSession.getRequest().getLocale().toString());
-
-    gameLogRepository.save(log);
+    GameLog.add(
+        gameLogRepository,
+        game,
+        userId,
+        point,
+        loginSession.getRequest().getRequestedSessionId(),
+        loginSession.getRequest().getSession().getCreationTime(),
+        loginSession.getRequest().getRemoteAddr(),
+        loginSession.getRequest().getHeader("user-agent"),
+        loginSession.getRequest().getLocale().toString());
 
     logger.traceExit();
   }

@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.lovelive.type;
+package net.sokontokoro_factory.lovelive.domain.score;
 
 /** TODO: Masterデータの検討 enum型を毎回更新するの面倒です。 */
 public enum GameType {

@@ -1,4 +1,4 @@
-package net.sokontokoro_factory.lovelive.type;
+package net.sokontokoro_factory.lovelive.domain.user;
 
 import java.util.HashMap;
 import java.util.Map;

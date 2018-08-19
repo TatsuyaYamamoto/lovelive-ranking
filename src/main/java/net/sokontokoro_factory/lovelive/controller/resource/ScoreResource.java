@@ -8,18 +8,17 @@ import java.util.Map;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.controller.dto.ScoreDto;
 import net.sokontokoro_factory.lovelive.controller.form.InsertScoreForm;
+import net.sokontokoro_factory.lovelive.domain.score.GameType;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.persistence.entity.ScoreEntity;
+import net.sokontokoro_factory.lovelive.domain.score.Score;
 import net.sokontokoro_factory.lovelive.service.LogService;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
 import net.sokontokoro_factory.lovelive.service.ScoreService;
-import net.sokontokoro_factory.lovelive.type.GameType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -72,14 +71,14 @@ public class ScoreResource {
 
     /* エンティティ取得 */
     GameType game = GameType.valueOf(upperCaseGameName);
-    ScoreEntity scoreEntity = scoreService.getScore(game, loginSession.getUserId());
+    Score scoreEntity = scoreService.getScore(game, loginSession.getUserId());
     long ranking = scoreService.getRankingNumber(game, scoreEntity.getPoint());
 
     /* レスポンスデータ作成 */
     ScoreDto score = new ScoreDto();
     score.setGame(game);
     score.setUserId(scoreEntity.getUserId());
-    score.setUserName(scoreEntity.getUserEntity().getName());
+    score.setUserName(scoreEntity.getUser().getName());
     score.setPoint(scoreEntity.getPoint());
     score.setCount(scoreEntity.getCount());
     score.setRanking(ranking);
@@ -199,12 +198,12 @@ public class ScoreResource {
 
     /* エンティティ取得 */
     GameType game = GameType.valueOf(upperCaseGameName);
-    List<ScoreEntity> scoreEntities = scoreService.getList(game, offset, limit);
+    List<Score> scoreEntities = scoreService.getList(game, offset, limit);
 
     List<ScoreDto> scores = new ArrayList();
     long ranking = 0;
     int upperUserPoint = Integer.MAX_VALUE;
-    for (ScoreEntity scoreEntity : scoreEntities) {
+    for (Score scoreEntity : scoreEntities) {
       int targetUserPoint = scoreEntity.getPoint();
       if (targetUserPoint < upperUserPoint) {
         ranking++;
@@ -213,7 +212,7 @@ public class ScoreResource {
       ScoreDto score = new ScoreDto();
       score.setUserId(scoreEntity.getUserId());
       score.setPoint(targetUserPoint);
-      score.setUserName(scoreEntity.getUserEntity().getName());
+      score.setUserName(scoreEntity.getUser().getName());
       score.setHighScoreDate(scoreEntity.getUpdateDate());
       score.setRanking(ranking);
 

@@ -7,12 +7,13 @@ import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth10aService;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.transaction.Transactional;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.persistence.UserRepository;
-import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
-import net.sokontokoro_factory.lovelive.type.FavoriteType;
+import net.sokontokoro_factory.lovelive.domain.user.UserRepository;
+import net.sokontokoro_factory.lovelive.domain.user.User;
+import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -62,16 +63,16 @@ public class UserService {
    * @return
    * @throws NoResourceException 存在しない、または論理削除済みの場合
    */
-  public UserEntity getById(long userId) throws NoResourceException {
+  public User getById(long userId) throws NoResourceException {
     logger.entry(userId);
-    UserEntity user = userRepos.findById(userId).orElse(null);
-    if (user == null) {
-      throw new NoResourceException("指定されたIDは未登録です。");
-    } else if (user.isDeleted()) {
-      throw new NoResourceException("削除済みのユーザーです。");
-    } else {
-      return user;
+
+    Optional<User> user = User.get(userRepos, userId);
+
+    if (user.isPresent()) {
+      return user.get();
     }
+
+    throw new NoResourceException("Provided ID is not registered.");
   }
 
   /**
@@ -83,23 +84,7 @@ public class UserService {
   @Transactional
   public void create(long userId, String name) {
     logger.entry(userId, name);
-
-    UserEntity user = userRepos.findById(userId).orElse(null);
-
-    if (user != null) {
-      /* 既存レコードのため、論理削除を外す */
-      user.setName(name);
-      user.setDeleted(false);
-    } else {
-      /* レコード新規作成 */
-      UserEntity createUser = new UserEntity();
-      createUser.setId(userId);
-      createUser.setName(name);
-      createUser.setCreateDate(System.currentTimeMillis());
-      createUser.setDeleted(false);
-      createUser.setAdmin(false);
-      userRepos.save(createUser);
-    }
+    User.create(userRepos, userId, name);
     logger.traceExit();
   }
 
@@ -117,7 +102,7 @@ public class UserService {
     logger.entry(userId, name, favorite);
 
     /* 更新対象のuser objectを取得 */
-    UserEntity updateUser = getById(userId);
+    User updateUser = getById(userId);
 
     /* 更新 */
     if (name != null) {
@@ -126,7 +111,6 @@ public class UserService {
     if (favorite != null) {
       updateUser.setFavorite(favorite);
     }
-    updateUser.setUpdateDate(System.currentTimeMillis());
 
     logger.traceExit();
   }
@@ -141,8 +125,8 @@ public class UserService {
   public void delete(long userId) throws NoResourceException {
     logger.entry(userId);
 
-    UserEntity user = getById(userId);
-    user.setDeleted(true);
+    User user = getById(userId);
+    user.delete();
 
     logger.traceExit();
   }

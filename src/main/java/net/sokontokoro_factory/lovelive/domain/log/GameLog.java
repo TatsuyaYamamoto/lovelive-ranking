@@ -1,13 +1,13 @@
-package net.sokontokoro_factory.lovelive.persistence.entity;
+package net.sokontokoro_factory.lovelive.domain.log;
 
 import javax.persistence.*;
 import lombok.Data;
-import net.sokontokoro_factory.lovelive.type.GameType;
+import net.sokontokoro_factory.lovelive.domain.score.GameType;
 
 @Entity
 @Table(name = "GAME_LOG")
 @Data
-public class GameLogEntity {
+public class GameLog {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,4 +40,28 @@ public class GameLogEntity {
 
   @Column(name = "LOCALE")
   private String locale;
+
+  public static GameLog add(
+      GameLogRepository repository,
+      GameType game,
+      long userId,
+      int point,
+      String sessionId,
+      long startSessionDate,
+      String clientIp,
+      String userAgent,
+      String locale) {
+    GameLog log = new GameLog();
+    log.setGame(game);
+    log.setUserId(userId);
+    log.setPoint(point);
+    log.setPlayDate(System.currentTimeMillis());
+    log.setSessionId(sessionId);
+    log.setStartSessionDate(startSessionDate);
+    log.setClientIp(clientIp);
+    log.setUserAgent(userAgent);
+    log.setLocale(locale);
+
+    return repository.save(log);
+  }
 }

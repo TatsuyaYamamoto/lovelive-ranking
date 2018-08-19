@@ -6,10 +6,10 @@ import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.controller.dto.UserDto;
 import net.sokontokoro_factory.lovelive.controller.form.UpdateUserForm;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
+import net.sokontokoro_factory.lovelive.domain.user.User;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
 import net.sokontokoro_factory.lovelive.service.UserService;
-import net.sokontokoro_factory.lovelive.type.FavoriteType;
+import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,8 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.print.attribute.standard.Media;
 
 @RestController
 @RequestMapping("users")
@@ -54,7 +52,7 @@ public class UserResource {
     }
 
     /* execute */
-    UserEntity user = userService.getById(loginSession.getUserId());
+    User user = userService.getById(loginSession.getUserId());
 
     /* twitterサーバーへの問い合わせ */
     String imageUrl = null;
