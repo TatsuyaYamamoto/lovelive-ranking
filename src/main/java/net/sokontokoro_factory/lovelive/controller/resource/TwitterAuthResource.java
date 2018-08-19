@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.ApplicationConfig;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
@@ -28,8 +29,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("auth/twitter")
-@Log4j2
+@Slf4j
 public class TwitterAuthResource {
+  private static final String GAME_ORIGIN = "http://games.sokontokoro-factory.net/";
   private ApplicationConfig config;
 
   private final LoginSession loginSession;
@@ -59,8 +61,8 @@ public class TwitterAuthResource {
     log.info("callback URL after logging:" + callbackUri);
 
     final OAuth10aService service =
-        new ServiceBuilder(config.credential.getTwitterKey())
-            .apiSecret(config.credential.getTwitterSecret())
+        new ServiceBuilder(config.getCredential().getTwitterKey())
+            .apiSecret(config.getCredential().getTwitterSecret())
             .callback(callbackUri)
             .build(TwitterApi.instance());
 
@@ -68,14 +70,16 @@ public class TwitterAuthResource {
     try {
       requestToken = service.getRequestToken();
     } catch (InterruptedException | ExecutionException | IOException e) {
-      log.catching(e);
+      String msg = "faild to access twitter auth providing server";
+      log.error(msg, e);
+
       ErrorDto error = new ErrorDto();
-      error.setMessage("faild to access twitter auth providing server");
+      error.setMessage(msg);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
     loginSession.setRedirectUriAfterLogging(
-        redirect.contains("://") ? redirect : "http://games.sokontokoro-factory.net" + redirect);
+        redirect.contains("://") ? redirect : GAME_ORIGIN + redirect);
     loginSession.setRequestToken(requestToken);
 
     // twitter認証画面へリダイレクト
@@ -114,8 +118,8 @@ public class TwitterAuthResource {
       if (denied.equals("admit")) {
         // 認証許可の場合
         final OAuth10aService service =
-            new ServiceBuilder(config.credential.getTwitterKey())
-                .apiSecret(config.credential.getTwitterSecret())
+            new ServiceBuilder(config.getCredential().getTwitterKey())
+                .apiSecret(config.getCredential().getTwitterSecret())
                 .build(TwitterApi.instance());
         final OAuth1AccessToken accessToken = service.getAccessToken(requestToken, oauthVerifier);
 
@@ -147,9 +151,11 @@ public class TwitterAuthResource {
         log.info("loging requesting user deny.");
       }
     } catch (ExecutionException | InterruptedException | IOException e) {
-      log.catching(e);
+      String msg = "faild to access twitter auth providing server";
+      log.error(msg, e);
+
       ErrorDto error = new ErrorDto();
-      error.setMessage("faild to access twitter auth providing server");
+      error.setMessage(msg);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
@@ -167,8 +173,7 @@ public class TwitterAuthResource {
       @RequestParam(value = "redirect", defaultValue = "/") String redirect,
       UriComponentsBuilder uriBuilder) {
 
-    String uri =
-        redirect.contains("://") ? redirect : "http://games.sokontokoro-factory.net" + redirect;
+    String uri = redirect.contains("://") ? redirect : GAME_ORIGIN + redirect;
 
     loginSession.invalidate();
 
