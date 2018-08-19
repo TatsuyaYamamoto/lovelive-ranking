@@ -1,14 +1,12 @@
 package net.sokontokoro_factory.lovelive.controller.form;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-@XmlRootElement
+@Getter
+@Setter
 public class InsertScoreForm {
-  @XmlElement(name = "point")
-  @Getter
-  @Setter
+  @JsonProperty("point")
   private Integer point;
 }

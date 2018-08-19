@@ -1,21 +1,28 @@
 package net.sokontokoro_factory.lovelive.service;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
+
+import net.sokontokoro_factory.lovelive.persistence.GameLogRepository;
 import net.sokontokoro_factory.lovelive.persistence.entity.GameLogEntity;
-import net.sokontokoro_factory.lovelive.persistence.facade.GameLogFacade;
 import net.sokontokoro_factory.lovelive.type.GameType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@RequestScoped
+@Component
 public class LogService {
   private static final Logger logger = LogManager.getLogger(LogService.class);
 
-  @Inject GameLogFacade gameLogFacade;
+  private final GameLogRepository gameLogRepository;
 
-  @Inject LoginSession loginSession;
+  private final LoginSession loginSession;
+
+  @Autowired
+  public LogService(GameLogRepository gameLogRepository, LoginSession loginSession) {
+    this.gameLogRepository = gameLogRepository;
+    this.loginSession = loginSession;
+  }
 
   /**
    * ゲームログを登録する
@@ -39,7 +46,7 @@ public class LogService {
     log.setUserAgent(loginSession.getRequest().getHeader("user-agent"));
     log.setLocale(loginSession.getRequest().getLocale().toString());
 
-    gameLogFacade.create(log);
+    gameLogRepository.save(log);
 
     logger.traceExit();
   }

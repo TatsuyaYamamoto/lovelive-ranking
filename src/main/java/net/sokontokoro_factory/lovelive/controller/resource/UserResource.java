@@ -2,29 +2,37 @@ package net.sokontokoro_factory.lovelive.controller.resource;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.controller.dto.UserDto;
 import net.sokontokoro_factory.lovelive.controller.form.UpdateUserForm;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.filter.AuthFilter;
 import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
 import net.sokontokoro_factory.lovelive.service.UserService;
 import net.sokontokoro_factory.lovelive.type.FavoriteType;
-import net.sokontokoro_factory.tweetly_oauth.TweetlyOAuthException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-@Path("users")
-@RequestScoped
+import javax.print.attribute.standard.Media;
+
+@RestController
+@RequestMapping("users")
 public class UserResource {
 
-  @Inject UserService userService;
+  private final UserService userService;
 
-  @Inject LoginSession loginSession;
+  private final LoginSession loginSession;
+
+  @Autowired
+  public UserResource(UserService userService, LoginSession loginSession) {
+    this.userService = userService;
+    this.loginSession = loginSession;
+  }
 
   /**
    * ログインアカウントの情報を返す。 user_id, user_nameはsokontokoro-server, iconURLはtwitter server RestAPIへ問い合わせる。
@@ -33,11 +41,17 @@ public class UserResource {
    * @throws NoResourceException
    * @throws TweetlyOAuthException
    */
-  @AuthFilter.LoginRequired
-  @Path("me")
-  @GET
-  @Produces({MediaType.APPLICATION_JSON})
-  public Response getMyInfo() throws NoResourceException {
+  @RequestMapping(
+      path = "me",
+      method = RequestMethod.GET,
+      produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+  public ResponseEntity getMyInfo() throws NoResourceException {
+
+    if (!loginSession.isLogin()) {
+      ErrorDto response = new ErrorDto();
+      response.setMessage("unauthorized. please request after logging.");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 
     /* execute */
     UserEntity user = userService.getById(loginSession.getUserId());
@@ -56,7 +70,7 @@ public class UserResource {
     if (user != null) {
       response.setIconURL(imageUrl);
     }
-    return Response.ok().entity(response).build();
+    return ResponseEntity.ok(response);
   }
 
   /**
@@ -66,11 +80,14 @@ public class UserResource {
    * @return
    * @throws NoResourceException
    */
-  @AuthFilter.LoginRequired
-  @Path("me")
-  @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response update(UpdateUserForm updateUserForm) throws NoResourceException {
+  @RequestMapping(path = "me", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity update(UpdateUserForm updateUserForm) throws NoResourceException {
+
+    if (!loginSession.isLogin()) {
+      ErrorDto response = new ErrorDto();
+      response.setMessage("unauthorized. please request after logging.");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 
     FavoriteType favorite = null;
     // キャラ名の入力チェック
@@ -78,14 +95,14 @@ public class UserResource {
       favorite = FavoriteType.codeOf(updateUserForm.getFavorite());
       if (favorite == null) {
         ErrorDto errorDto = new ErrorDto("正しいキャラクター名を指定して下さい");
-        return Response.status(Response.Status.BAD_REQUEST).entity(errorDto).build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
       }
     }
 
     /* execute */
     userService.update(loginSession.getUserId(), updateUserForm.getUserName(), favorite);
 
-    return Response.ok().build();
+    return ResponseEntity.ok().build();
   }
 
   /**
@@ -94,17 +111,20 @@ public class UserResource {
    * @return
    * @throws NoResourceException
    */
-  @AuthFilter.LoginRequired
-  @Path("me")
-  @DELETE
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteMyInfo() throws NoResourceException {
+  @RequestMapping(path = "me", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+  public ResponseEntity deleteMyInfo() throws NoResourceException {
+
+    if (!loginSession.isLogin()) {
+      ErrorDto response = new ErrorDto();
+      response.setMessage("unauthorized. please request after logging.");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 
     /* execute */
     userService.delete(loginSession.getUserId());
     loginSession.invalidate();
 
     /* レスポンス */
-    return Response.noContent().build();
+    return ResponseEntity.noContent().build();
   }
 }

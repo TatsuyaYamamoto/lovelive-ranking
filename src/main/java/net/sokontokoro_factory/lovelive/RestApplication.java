@@ -1,19 +1,19 @@
 package net.sokontokoro_factory.lovelive;
 
-import javax.ws.rs.ApplicationPath;
-import net.sokontokoro_factory.lovelive.controller.errorhandling.NoResourceExceptionMapper;
-import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
-import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-@ApplicationPath("")
-public class RestApplication extends ResourceConfig {
-  public RestApplication() {
-    // resource classes
-    packages(false, this.getClass().getPackage().getName() + ".controller.resource")
-        .register(NoResourceExceptionMapper.class)
-        .register(InvalidArgumentException.class);
+@SpringBootApplication
+public class RestApplication extends SpringBootServletInitializer {
 
-    // filter classes
-    packages(false, this.getClass().getPackage().getName() + ".filter");
+  public static void main(String[] args) {
+    SpringApplication.run(RestApplication.class, args);
+  }
+
+  @Override
+  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+    return application.sources(RestApplication.class);
   }
 }

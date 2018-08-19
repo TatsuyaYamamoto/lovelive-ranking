@@ -8,28 +8,34 @@ import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth10aService;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
+import net.sokontokoro_factory.lovelive.persistence.UserRepository;
 import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
-import net.sokontokoro_factory.lovelive.persistence.facade.UserFacade;
 import net.sokontokoro_factory.lovelive.type.FavoriteType;
-import net.sokontokoro_factory.yoshinani.file.config.Config;
-import net.sokontokoro_factory.yoshinani.file.config.ConfigLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-@RequestScoped
+@Component
 public class UserService {
   private static final Logger logger = LogManager.getLogger(UserService.class);
 
-  private static final Config config = ConfigLoader.getProperties();
-  private static final String TWITTER_APIKEY = config.getString("twitter.apikey");
-  private static final String TWITTER_SECRET = config.getString("twitter.secret");
+  @Value("${app.credential.twitter-key}")
+  private String twitterApikey;
 
-  @Inject UserFacade userFacade;
+  @Value("${app.credential.twitter-secret}")
+  private String twitterSecret;
+
+  private final UserRepository userRepos;
+
+  @Autowired
+  public UserService(UserRepository userRepos) {
+    this.userRepos = userRepos;
+  }
 
   public String getProfileImageUrl(long userId, OAuth1AccessToken accessToken)
       throws InterruptedException, ExecutionException, IOException {
@@ -37,7 +43,7 @@ public class UserService {
 
     /* twitterサーバーへの問い合わせ */
     final OAuth10aService service =
-        new ServiceBuilder(TWITTER_APIKEY).apiSecret(TWITTER_SECRET).build(TwitterApi.instance());
+        new ServiceBuilder(twitterApikey).apiSecret(twitterSecret).build(TwitterApi.instance());
     final OAuthRequest request =
         new OAuthRequest(Verb.GET, "https://api.twitter.com/1.1/users/show.json?user_id=" + userId);
 
@@ -58,14 +64,13 @@ public class UserService {
    */
   public UserEntity getById(long userId) throws NoResourceException {
     logger.entry(userId);
-
-    UserEntity user = userFacade.findById(userId);
+    UserEntity user = userRepos.findById(userId).orElse(null);
     if (user == null) {
       throw new NoResourceException("指定されたIDは未登録です。");
     } else if (user.isDeleted()) {
       throw new NoResourceException("削除済みのユーザーです。");
     } else {
-      return logger.traceExit(user);
+      return user;
     }
   }
 
@@ -79,7 +84,7 @@ public class UserService {
   public void create(long userId, String name) {
     logger.entry(userId, name);
 
-    UserEntity user = userFacade.findById(userId);
+    UserEntity user = userRepos.findById(userId).orElse(null);
 
     if (user != null) {
       /* 既存レコードのため、論理削除を外す */
@@ -93,7 +98,7 @@ public class UserService {
       createUser.setCreateDate(System.currentTimeMillis());
       createUser.setDeleted(false);
       createUser.setAdmin(false);
-      userFacade.create(createUser);
+      userRepos.save(createUser);
     }
     logger.traceExit();
   }

@@ -2,24 +2,21 @@ package net.sokontokoro_factory.lovelive.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
 /** JAX-RSによるErrorレスポンスを表現するJavaBean */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@XmlRootElement
+@Getter
+@Setter
 public class ErrorDto {
-  @XmlElement(name = "target")
-  @Getter
-  @Setter
+  @JsonProperty("target")
   private String target;
 
-  @XmlElement(name = "message")
-  @Getter
-  @Setter
+  @JsonProperty("message")
   private String message;
 
   public ErrorDto() {}

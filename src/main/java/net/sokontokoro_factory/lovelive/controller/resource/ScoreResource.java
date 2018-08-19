@@ -5,43 +5,40 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.controller.dto.ScoreDto;
 import net.sokontokoro_factory.lovelive.controller.form.InsertScoreForm;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.filter.AuthFilter;
 import net.sokontokoro_factory.lovelive.persistence.entity.ScoreEntity;
 import net.sokontokoro_factory.lovelive.service.LogService;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
 import net.sokontokoro_factory.lovelive.service.ScoreService;
-import net.sokontokoro_factory.lovelive.service.UserService;
 import net.sokontokoro_factory.lovelive.type.GameType;
-import net.sokontokoro_factory.yoshinani.file.config.Config;
-import net.sokontokoro_factory.yoshinani.file.config.ConfigLoader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-@Path("scores")
-@RequestScoped
+@RestController
+@RequestMapping("scores")
 public class ScoreResource {
-  private static final Config config = ConfigLoader.getProperties("config");
-  private static final int PRODUCE_NUMBER_OF_RANKING = config.getInt("produce.number.ranking");
+  private final LoginSession loginSession;
 
-  @Context UriInfo uriInfo;
+  private final ScoreService scoreService;
 
-  @Inject LoginSession loginSession;
+  private final LogService logService;
 
-  @Inject UserService userService;
-
-  @Inject ScoreService scoreService;
-
-  @Inject LogService logService;
+  @Autowired
+  public ScoreResource(
+      LoginSession loginSession, ScoreService scoreService, LogService logService) {
+    this.loginSession = loginSession;
+    this.scoreService = scoreService;
+    this.logService = logService;
+  }
 
   /**
    * ログイン中のUserIDのスコア情報を取得する
@@ -51,12 +48,18 @@ public class ScoreResource {
    * @throws NoResourceException
    * @throws InvalidArgumentException
    */
-  @AuthFilter.LoginRequired
-  @Path("{game_name}/me")
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response getScore(@PathParam(value = "game_name") String gameName)
+  @RequestMapping(
+      path = "{game_name}/me",
+      method = RequestMethod.GET,
+      produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+  public ResponseEntity getScore(@PathVariable("game_name") String gameName)
       throws NoResourceException, InvalidArgumentException {
+
+    if (!loginSession.isLogin()) {
+      ErrorDto response = new ErrorDto();
+      response.setMessage("unauthorized. please request after logging.");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 
     String upperCaseGameName = gameName.toUpperCase();
 
@@ -64,7 +67,7 @@ public class ScoreResource {
     if (!GameType.contains(upperCaseGameName)) {
       ErrorDto errorDto = new ErrorDto();
       errorDto.setMessage("正しいゲーム名を指定して下さい");
-      return Response.status(Response.Status.NOT_FOUND).entity(errorDto).build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
     }
 
     /* エンティティ取得 */
@@ -82,7 +85,7 @@ public class ScoreResource {
     score.setRanking(ranking);
 
     /* レスポンス */
-    return Response.ok().entity(score).build();
+    return ResponseEntity.ok(score);
   }
 
   /**
@@ -93,19 +96,27 @@ public class ScoreResource {
    * @return
    * @throws InvalidArgumentException
    */
-  @AuthFilter.LoginRequired
-  @Path("{game_name}/me")
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response insertScore(
-      @PathParam("game_name") String gameName, InsertScoreForm insertScoreForm)
+  @RequestMapping(
+      path = "{game_name}/me",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity insertScore(
+      @PathVariable("game_name") String gameName,
+      InsertScoreForm insertScoreForm,
+      UriComponentsBuilder uriBuilder)
       throws InvalidArgumentException {
+
+    if (!loginSession.isLogin()) {
+      ErrorDto response = new ErrorDto();
+      response.setMessage("unauthorized. please request after logging.");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 
     // 入力チェック
     if (insertScoreForm.getPoint() == null) {
       ErrorDto errorDto = new ErrorDto("点数を入力して下さい");
-      return Response.status(Response.Status.BAD_REQUEST).entity(errorDto).build();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
     }
 
     // ゲーム名の入力チェック
@@ -113,36 +124,41 @@ public class ScoreResource {
     if (!GameType.contains(upperCaseGameName)) {
       ErrorDto errorDto = new ErrorDto();
       errorDto.setMessage("正しいゲーム名を指定して下さい");
-      return Response.status(Response.Status.NOT_FOUND).entity(errorDto).build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
     }
 
     /* DB書き込み */
     GameType game = GameType.valueOf(upperCaseGameName);
-    scoreService.insertScore(game, loginSession.getUserId(), insertScoreForm.getPoint());
+    try {
+      scoreService.insertScore(game, loginSession.getUserId(), insertScoreForm.getPoint());
+    } catch (NoResourceException e) {
+      ErrorDto errorDto = new ErrorDto();
+      errorDto.setMessage("正しいゲーム名を指定して下さい");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
+    }
 
     /* レスポンス */
     URI uri =
-        uriInfo
-            .getBaseUriBuilder()
-            .path(ScoreResource.class)
-            .path(game.name().toLowerCase())
-            .path("me")
-            .build();
+        uriBuilder
+            .path("lovelive/scores/{game}/me")
+            .buildAndExpand(game.name().toLowerCase())
+            .toUri();
 
-    return Response.created(uri).build();
+    return ResponseEntity.created(uri).build();
   }
 
-  @Path("{game_name}/playlog")
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response postPlayLog(
-      @PathParam("game_name") String gameName, InsertScoreForm insertScoreForm) {
+  @RequestMapping(
+      path = "{game_name}/playlog",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity postPlayLog(
+      @PathVariable("game_name") String gameName, InsertScoreForm insertScoreForm) {
     // ゲーム名の入力チェック
     String upperCaseGameName = gameName.toUpperCase();
     if (!GameType.contains(upperCaseGameName)) {
       ErrorDto errorDto = new ErrorDto();
       errorDto.setMessage("正しいゲーム名を指定して下さい");
-      return Response.status(Response.Status.NOT_FOUND).entity(errorDto).build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
     }
 
     /* ロギング */
@@ -150,7 +166,7 @@ public class ScoreResource {
     logService.addGameLog(
         game, loginSession != null ? loginSession.getUserId() : null, insertScoreForm.getPoint());
 
-    return Response.status(Response.Status.CREATED).build();
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   /**
@@ -160,31 +176,30 @@ public class ScoreResource {
    * @param offset
    * @return
    */
-  @Path("/{game_name}/ranking")
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response getRankingData(
-      @PathParam(value = "game_name") String gameName,
-      @QueryParam(value = "offset") @DefaultValue("1") Integer offset) {
+  @RequestMapping(
+      path = "/{game_name}/ranking",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity getRankingData(
+      @PathVariable("game_name") String gameName,
+      @RequestParam(value = "offset", defaultValue = "1") Integer offset,
+      @RequestParam(value = "offset", defaultValue = "10") Integer limit) {
 
     // ゲーム名の入力チェック
     String upperCaseGameName = gameName.toUpperCase();
     if (!GameType.contains(upperCaseGameName)) {
-      return Response.status(Response.Status.NOT_FOUND)
-          .entity(new ErrorDto("正しいゲーム名を指定して下さい"))
-          .build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto("正しいゲーム名を指定して下さい"));
     }
 
     // offset値の入力チェック
     if (offset <= 0) {
-      return Response.status(Response.Status.BAD_REQUEST)
-          .entity(new ErrorDto("ランキングのoffset値は1以上を指定して下さい。"))
-          .build();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new ErrorDto("ランキングのoffset値は1以上を指定して下さい。"));
     }
 
     /* エンティティ取得 */
     GameType game = GameType.valueOf(upperCaseGameName);
-    List<ScoreEntity> scoreEntities = scoreService.getList(game, offset, PRODUCE_NUMBER_OF_RANKING);
+    List<ScoreEntity> scoreEntities = scoreService.getList(game, offset, limit);
 
     List<ScoreDto> scores = new ArrayList();
     long ranking = 0;
@@ -213,6 +228,6 @@ public class ScoreResource {
     response.put("ranking_table", scores);
 
     /* レスポンス */
-    return Response.ok().entity(response).build();
+    return ResponseEntity.ok(response);
   }
 }

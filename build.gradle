@@ -1,10 +1,23 @@
+buildscript {
+    ext {
+        springBootVersion = '2.0.4.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
 plugins {
     id "com.diffplug.gradle.spotless" version "3.14.0"
+    id 'net.ltgt.apt' version '0.10'
 }
 
 apply plugin: 'war'
-apply plugin: 'jacoco'
-
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 group = 'net.sokontokoro_factory'
 version = '2.3'
@@ -12,73 +25,49 @@ version = '2.3'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-war {
-    archiveName = "lovelive-${version}.${getDate()}.war"
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    providedRuntime
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('mysql:mysql-connector-java')
+    compile('javax.xml.bind:jaxb-api')
+    compile('org.springframework.boot:spring-boot-starter-web')
+
+    providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+
+    runtime('org.springframework.boot:spring-boot-devtools')
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+
+
+    compileOnly 'org.projectlombok:lombok:1.18.2'
+    apt "org.projectlombok:lombok:1.18.2"
+
+    // twitter auth client
+    compile group: 'com.github.scribejava', name: 'scribejava-apis', version: '5.1.0'
+
+    // JSON parse
+    compile group: 'org.json', name: 'json', version: '20180130'
+}
+
+bootRun {
+    systemProperties = System.properties as Map<String, ?>
+}
+
+bootWar {
+    def yyyyMMdd =  new Date().format('yyyyMMdd')
+    archiveName = "lovelive-ranking_${version}_${yyyyMMdd}.war"
 }
 
 spotless {
     java {
         googleJavaFormat('1.6')
     }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
-
-    // jersey servlet
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.23.1'
-    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.23.1'
-    providedCompile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
-
-    // CDI container
-    compile group: 'org.glassfish.jersey.ext.cdi', name: 'jersey-cdi1x', version: '2.23.1'
-    compile group: 'org.jboss.weld.servlet', name: 'weld-servlet', version: '2.3.5.Final'
-
-    // twitter auth client
-    compile group: 'com.github.scribejava', name: 'scribejava-apis', version: '5.1.0'
-
-    // database
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.39'
-    compile group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.6.3'
-    compile group: 'javax.transaction', name: 'javax.transaction-api', version: '1.2'
-
-    // JSON parse
-    compile group: 'org.json', name: 'json', version: '20160212'
-
-    // logger
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6.2'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.2'
-
-    // generator
-    providedCompile group: 'org.projectlombok', name: 'lombok', version: '1.16.10'
-
-    // test
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
-    testCompile group: 'org.dbunit', name: 'dbunit', version: '2.5.2'
-    testCompile group: 'org.apache.commons', name: 'commons-csv', version: '1.1'
-
-    // CDI container for UT
-    testCompile group: 'org.jboss.weld.se', name: 'weld-se', version: '2.3.5.Final'
-    testCompile group: 'org.apache.deltaspike.cdictrl', name: 'deltaspike-cdictrl-weld', version: '1.7.1'
-    testCompile group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-api', version: '1.7.1'
-    testCompile group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-impl', version: '1.7.1'
-}
-sourceSets {
-    main {
-        output.resourcesDir = output.classesDir
-    }
-    test {
-        output.resourcesDir = output.classesDir
-    }
-}
-
-def getDate() {
-    def date = new Date()
-    return date.format('yyyyMMdd')
 }

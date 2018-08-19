@@ -5,28 +5,31 @@ import static java.util.Comparator.comparing;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
+import net.sokontokoro_factory.lovelive.persistence.ScoreRepository;
 import net.sokontokoro_factory.lovelive.persistence.entity.ScoreEntity;
-import net.sokontokoro_factory.lovelive.persistence.facade.GameLogFacade;
-import net.sokontokoro_factory.lovelive.persistence.facade.ScoreFacade;
-import net.sokontokoro_factory.lovelive.persistence.facade.UserFacade;
+import net.sokontokoro_factory.lovelive.persistence.entity.UserEntity;
 import net.sokontokoro_factory.lovelive.type.GameType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@RequestScoped
+@Component
 public class ScoreService {
   private static final Logger logger = LogManager.getLogger(ScoreService.class);
 
-  @Inject ScoreFacade scoreFacade;
+  private final ScoreRepository scoreRepo;
 
-  @Inject UserFacade userFacade;
+  private final UserService userService;
 
-  @Inject GameLogFacade gameLogFacade;
+  @Autowired
+  public ScoreService(ScoreRepository scoreRepo, UserService userService) {
+    this.scoreRepo = scoreRepo;
+    this.userService = userService;
+  }
 
   /**
    * スコア情報を返す
@@ -40,11 +43,8 @@ public class ScoreService {
   public ScoreEntity getScore(GameType game, long userId)
       throws NoResourceException, InvalidArgumentException {
     /* ID確認 */
-    if (!userFacade.isExist(userId)) {
-      throw new InvalidArgumentException("存在しないユーザーIDです。");
-    }
-
-    ScoreEntity score = scoreFacade.findOne(game, userId);
+    UserEntity user = userService.getById(userId);
+    ScoreEntity score = scoreRepo.findByGameAndUserId(game, userId);
     if (score == null) {
       throw new NoResourceException("スコア未登録です。");
     } else {
@@ -61,14 +61,12 @@ public class ScoreService {
    * @throws InvalidArgumentException
    */
   @Transactional
-  public void insertScore(GameType game, long userId, int point) throws InvalidArgumentException {
+  public void insertScore(GameType game, long userId, int point)
+      throws InvalidArgumentException, NoResourceException {
 
     /* ID確認 */
-    if (!userFacade.isExist(userId)) {
-      throw new InvalidArgumentException("存在しないユーザーIDです。");
-    }
-
-    ScoreEntity registeredScore = scoreFacade.findOne(game, userId);
+    UserEntity user = userService.getById(userId);
+    ScoreEntity registeredScore = getScore(game, userId);
 
     if (registeredScore != null) {
       update(registeredScore, point);
@@ -87,7 +85,7 @@ public class ScoreService {
   public Long getRankingNumber(GameType targetGame, int targetPoint) {
     logger.entry("getRanking()", targetGame, targetPoint);
 
-    List<ScoreEntity> allScore = scoreFacade.findAll();
+    List<ScoreEntity> allScore = scoreRepo.findAll();
     long ranking =
         allScore
                 .stream()
@@ -113,7 +111,7 @@ public class ScoreService {
     int offsetBorderPoint = getBorderPoint(targetGame, offsetRankingNumber);
     int limitBorderPoint = getBorderPoint(targetGame, offsetRankingNumber + range);
 
-    List<ScoreEntity> allScore = scoreFacade.findAll();
+    List<ScoreEntity> allScore = scoreRepo.findAll();
     List<ScoreEntity> topScores =
         allScore
             .stream()
@@ -136,7 +134,7 @@ public class ScoreService {
    */
   public int getBorderPoint(GameType targetGame, int targetRankingNumber) {
     logger.entry(targetGame);
-    List<ScoreEntity> allScore = scoreFacade.findAll();
+    List<ScoreEntity> allScore = scoreRepo.findAll();
 
     List<Integer> descPoints =
         allScore
@@ -182,7 +180,7 @@ public class ScoreService {
     scoreEntity.setCreateDate(System.currentTimeMillis());
     scoreEntity.setFinalDate(System.currentTimeMillis());
 
-    scoreFacade.create(scoreEntity);
+    scoreRepo.save(scoreEntity);
     logger.traceExit();
   }
 

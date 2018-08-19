@@ -1,48 +1,34 @@
 package net.sokontokoro_factory.lovelive.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import net.sokontokoro_factory.lovelive.type.GameType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@XmlRootElement
+@Getter
+@Setter
 public class ScoreDto {
 
-  @XmlElement(name = "game")
-  @Getter
-  @Setter
+  @JsonProperty("game")
   private GameType game;
 
-  @XmlElement(name = "user_id")
-  @Getter
-  @Setter
+  @JsonProperty("user_id")
   private Long userId;
 
-  @XmlElement(name = "user_name")
-  @Getter
-  @Setter
+  @JsonProperty("user_name")
   private String userName;
 
-  @XmlElement(name = "point")
-  @Getter
-  @Setter
+  @JsonProperty("point")
   private Integer point;
 
-  @XmlElement(name = "high_score_date")
-  @Getter
-  @Setter
+  @JsonProperty("high_score_date")
   private Long highScoreDate;
 
-  @XmlElement(name = "count")
-  @Getter
-  @Setter
+  @JsonProperty("count")
   private Integer count;
 
-  @XmlElement(name = "ranking")
-  @Getter
-  @Setter
+  @JsonProperty("ranking")
   private Long ranking;
 }

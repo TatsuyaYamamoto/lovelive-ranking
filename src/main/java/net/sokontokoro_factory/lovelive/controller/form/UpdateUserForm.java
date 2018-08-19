@@ -1,19 +1,15 @@
 package net.sokontokoro_factory.lovelive.controller.form;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-@XmlRootElement
+@Getter
+@Setter
 public class UpdateUserForm {
-  @XmlElement(name = "user_name")
-  @Getter
-  @Setter
+  @JsonProperty("user_name")
   private String userName;
 
-  @XmlElement(name = "favorite")
-  @Getter
-  @Setter
+  @JsonProperty("favorite")
   private String favorite;
 }

@@ -2,51 +2,36 @@ package net.sokontokoro_factory.lovelive.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@XmlRootElement
+@Getter
+@Setter
 public class UserDto {
-  @XmlElement(name = "user_id")
-  @Getter
-  @Setter
+  @JsonProperty("user_id")
   private Long id;
 
-  @XmlElement(name = "user_name")
-  @Getter
-  @Setter
+  @JsonProperty("user_name")
   private String name;
 
-  @XmlElement(name = "admin")
-  @Getter
-  @Setter
+  @JsonProperty("admin")
   private Boolean admin;
 
-  @XmlElement(name = "deleted")
-  @Getter
-  @Setter
+  @JsonProperty("deleted")
   private Boolean deleted;
 
-  @XmlElement(name = "create_date")
-  @Getter
-  @Setter
+  @JsonProperty("create_date")
   private Long createDate;
 
-  @XmlElement(name = "update_date")
-  @Getter
-  @Setter
+  @JsonProperty("update_date")
   private Long updateDate;
 
-  @XmlElement(name = "icon_url")
-  @Getter
-  @Setter
+  @JsonProperty("icon_url")
   private String iconURL;
 
-  @XmlElement(name = "scores")
-  @Getter
-  @Setter
+  @JsonProperty("scores")
   private List<ScoreDto> scores;
 }
