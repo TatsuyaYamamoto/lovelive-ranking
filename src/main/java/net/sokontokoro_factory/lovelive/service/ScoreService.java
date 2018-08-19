@@ -7,29 +7,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-
+import lombok.extern.log4j.Log4j2;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
+import net.sokontokoro_factory.lovelive.domain.score.Score;
 import net.sokontokoro_factory.lovelive.domain.score.ScoreRepository;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.domain.score.Score;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Log4j2
 public class ScoreService {
-  private static final Logger logger = LogManager.getLogger(ScoreService.class);
-
   private final ScoreRepository scoreRepo;
 
-  private final UserService userService;
-
   @Autowired
-  public ScoreService(ScoreRepository scoreRepo, UserService userService) {
+  public ScoreService(ScoreRepository scoreRepo) {
     this.scoreRepo = scoreRepo;
-    this.userService = userService;
   }
 
   /**
@@ -79,7 +73,7 @@ public class ScoreService {
    * @return
    */
   public Long getRankingNumber(GameType targetGame, int targetPoint) {
-    logger.entry("getRanking()", targetGame, targetPoint);
+    log.entry("getRanking()", targetGame, targetPoint);
 
     List<Score> allScore = scoreRepo.findAll();
     long ranking =
@@ -91,7 +85,7 @@ public class ScoreService {
                 .count()
             + 1;
 
-    return logger.traceExit(ranking);
+    return log.traceExit(ranking);
   }
 
   /**
@@ -103,7 +97,7 @@ public class ScoreService {
    * @return
    */
   public List<Score> getList(GameType targetGame, int offsetRankingNumber, int range) {
-    logger.entry(targetGame, offsetRankingNumber);
+    log.entry(targetGame, offsetRankingNumber);
     int offsetBorderPoint = getBorderPoint(targetGame, offsetRankingNumber);
     int limitBorderPoint = getBorderPoint(targetGame, offsetRankingNumber + range);
 
@@ -118,7 +112,7 @@ public class ScoreService {
             .sorted(comparing(Score::getPoint).reversed())
             .collect(Collectors.toList());
 
-    return logger.traceExit(topScores);
+    return log.traceExit(topScores);
   }
 
   /**
@@ -129,7 +123,7 @@ public class ScoreService {
    * @return
    */
   public int getBorderPoint(GameType targetGame, int targetRankingNumber) {
-    logger.entry(targetGame);
+    log.entry(targetGame);
     List<Score> allScore = scoreRepo.findAll();
 
     List<Integer> descPoints =
@@ -152,7 +146,7 @@ public class ScoreService {
     } else {
       borderPoint = descPoints.get(targetRankingNumber - 1);
     }
-    logger.info("game: " + targetGame + ", borderpoint: " + borderPoint);
-    return logger.traceExit(borderPoint);
+    log.info("game: " + targetGame + ", borderpoint: " + borderPoint);
+    return log.traceExit(borderPoint);
   }
 }

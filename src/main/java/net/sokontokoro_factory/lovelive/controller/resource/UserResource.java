@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutionException;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.controller.dto.UserDto;
 import net.sokontokoro_factory.lovelive.controller.form.UpdateUserForm;
-import net.sokontokoro_factory.lovelive.exception.NoResourceException;
+import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
 import net.sokontokoro_factory.lovelive.domain.user.User;
+import net.sokontokoro_factory.lovelive.exception.NoResourceException;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
 import net.sokontokoro_factory.lovelive.service.UserService;
-import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -78,7 +78,10 @@ public class UserResource {
    * @return
    * @throws NoResourceException
    */
-  @RequestMapping(path = "me", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @RequestMapping(
+      path = "me",
+      method = RequestMethod.PUT,
+      consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity update(UpdateUserForm updateUserForm) throws NoResourceException {
 
     if (!loginSession.isLogin()) {
@@ -109,7 +112,10 @@ public class UserResource {
    * @return
    * @throws NoResourceException
    */
-  @RequestMapping(path = "me", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+  @RequestMapping(
+      path = "me",
+      method = RequestMethod.DELETE,
+      produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
   public ResponseEntity deleteMyInfo() throws NoResourceException {
 
     if (!loginSession.isLogin()) {

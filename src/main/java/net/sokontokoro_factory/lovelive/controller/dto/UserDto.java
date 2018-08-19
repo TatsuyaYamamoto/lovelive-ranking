@@ -1,9 +1,8 @@
 package net.sokontokoro_factory.lovelive.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 

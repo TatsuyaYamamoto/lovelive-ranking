@@ -34,11 +34,15 @@ configurations {
 }
 
 dependencies {
+    compile('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    compile('org.springframework.boot:spring-boot-starter-log4j2')
+
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('mysql:mysql-connector-java')
     compile('javax.xml.bind:jaxb-api')
-    compile('org.springframework.boot:spring-boot-starter-web')
 
     providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
 
@@ -62,7 +66,7 @@ bootRun {
 }
 
 bootWar {
-    def yyyyMMdd =  new Date().format('yyyyMMdd')
+    def yyyyMMdd = new Date().format('yyyyMMdd')
     archiveName = "lovelive-ranking_${version}_${yyyyMMdd}.war"
 }
 

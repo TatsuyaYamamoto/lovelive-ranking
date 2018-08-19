@@ -1,19 +1,16 @@
 package net.sokontokoro_factory.lovelive.service;
 
 import javax.transaction.Transactional;
-
-import net.sokontokoro_factory.lovelive.domain.log.GameLogRepository;
+import lombok.extern.log4j.Log4j2;
 import net.sokontokoro_factory.lovelive.domain.log.GameLog;
+import net.sokontokoro_factory.lovelive.domain.log.GameLogRepository;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Log4j2
 public class LogService {
-  private static final Logger logger = LogManager.getLogger(LogService.class);
-
   private final GameLogRepository gameLogRepository;
 
   private final LoginSession loginSession;
@@ -33,7 +30,7 @@ public class LogService {
    */
   @Transactional
   public void addGameLog(GameType game, Long userId, int point) {
-    logger.entry("add()", game, userId);
+    log.entry("add()", game, userId);
 
     GameLog.add(
         gameLogRepository,
@@ -46,6 +43,6 @@ public class LogService {
         loginSession.getRequest().getHeader("user-agent"),
         loginSession.getRequest().getLocale().toString());
 
-    logger.traceExit();
+    log.traceExit();
   }
 }

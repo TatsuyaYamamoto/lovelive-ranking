@@ -10,41 +10,37 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.transaction.Transactional;
-import net.sokontokoro_factory.lovelive.exception.NoResourceException;
-import net.sokontokoro_factory.lovelive.domain.user.UserRepository;
-import net.sokontokoro_factory.lovelive.domain.user.User;
+import lombok.extern.log4j.Log4j2;
+import net.sokontokoro_factory.lovelive.ApplicationConfig;
 import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.sokontokoro_factory.lovelive.domain.user.User;
+import net.sokontokoro_factory.lovelive.domain.user.UserRepository;
+import net.sokontokoro_factory.lovelive.exception.NoResourceException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@Log4j2
 public class UserService {
-  private static final Logger logger = LogManager.getLogger(UserService.class);
-
-  @Value("${app.credential.twitter-key}")
-  private String twitterApikey;
-
-  @Value("${app.credential.twitter-secret}")
-  private String twitterSecret;
-
+  private ApplicationConfig config;
   private final UserRepository userRepos;
 
   @Autowired
-  public UserService(UserRepository userRepos) {
+  public UserService(ApplicationConfig config, UserRepository userRepos) {
+    this.config = config;
     this.userRepos = userRepos;
   }
 
   public String getProfileImageUrl(long userId, OAuth1AccessToken accessToken)
       throws InterruptedException, ExecutionException, IOException {
-    logger.entry(userId, accessToken);
+    log.entry(userId, accessToken);
 
     /* twitterサーバーへの問い合わせ */
     final OAuth10aService service =
-        new ServiceBuilder(twitterApikey).apiSecret(twitterSecret).build(TwitterApi.instance());
+        new ServiceBuilder(config.credential.getTwitterKey())
+            .apiSecret(config.credential.getTwitterSecret())
+            .build(TwitterApi.instance());
     final OAuthRequest request =
         new OAuthRequest(Verb.GET, "https://api.twitter.com/1.1/users/show.json?user_id=" + userId);
 
@@ -53,7 +49,7 @@ public class UserService {
     JSONObject usersShowJson = new JSONObject(body);
 
     String profileImageUrl = usersShowJson.get("profile_image_url").toString();
-    return logger.traceExit(profileImageUrl);
+    return log.traceExit(profileImageUrl);
   }
 
   /**
@@ -64,7 +60,7 @@ public class UserService {
    * @throws NoResourceException 存在しない、または論理削除済みの場合
    */
   public User getById(long userId) throws NoResourceException {
-    logger.entry(userId);
+    log.entry(userId);
 
     Optional<User> user = User.get(userRepos, userId);
 
@@ -83,9 +79,9 @@ public class UserService {
    */
   @Transactional
   public void create(long userId, String name) {
-    logger.entry(userId, name);
+    log.entry(userId, name);
     User.create(userRepos, userId, name);
-    logger.traceExit();
+    log.traceExit();
   }
 
   /**
@@ -99,7 +95,7 @@ public class UserService {
   @Transactional
   public void update(long userId, String name, FavoriteType favorite) throws NoResourceException {
 
-    logger.entry(userId, name, favorite);
+    log.entry(userId, name, favorite);
 
     /* 更新対象のuser objectを取得 */
     User updateUser = getById(userId);
@@ -112,7 +108,7 @@ public class UserService {
       updateUser.setFavorite(favorite);
     }
 
-    logger.traceExit();
+    log.traceExit();
   }
 
   /**
@@ -123,11 +119,11 @@ public class UserService {
    */
   @Transactional
   public void delete(long userId) throws NoResourceException {
-    logger.entry(userId);
+    log.entry(userId);
 
     User user = getById(userId);
     user.delete();
 
-    logger.traceExit();
+    log.traceExit();
   }
 }

@@ -1,11 +1,10 @@
 package net.sokontokoro_factory.lovelive.domain.score;
 
+import java.util.Optional;
 import javax.persistence.*;
 import lombok.Data;
 import lombok.NonNull;
 import net.sokontokoro_factory.lovelive.domain.user.User;
-
-import java.util.Optional;
 
 /**
  * TODO: スコアの持ち方の再検討 IntegerのPointカラムしかないため、少数、文字列の評価ができない。

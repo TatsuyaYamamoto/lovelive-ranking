@@ -10,15 +10,14 @@ import com.github.scribejava.core.oauth.OAuth10aService;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
+import lombok.extern.log4j.Log4j2;
+import net.sokontokoro_factory.lovelive.ApplicationConfig;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
 import net.sokontokoro_factory.lovelive.service.UserService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,22 +28,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("auth/twitter")
+@Log4j2
 public class TwitterAuthResource {
-  private static final Logger logger =
-      LogManager.getLogger(TwitterAuthResource.class.getSimpleName());
-
-  @Value("${app.credential.twitter-key}")
-  private String twitterApikey;
-
-  @Value("${app.credential.twitter-secret}")
-  private String twitterSecret;
+  private ApplicationConfig config;
 
   private final LoginSession loginSession;
 
   private final UserService userService;
 
   @Autowired
-  public TwitterAuthResource(LoginSession loginSession, UserService userService) {
+  public TwitterAuthResource(
+      ApplicationConfig config, LoginSession loginSession, UserService userService) {
+    this.config = config;
     this.loginSession = loginSession;
     this.userService = userService;
   }
@@ -61,11 +56,11 @@ public class TwitterAuthResource {
       UriComponentsBuilder uriBuilder) {
 
     String callbackUri = uriBuilder.path("/auth/twitter/callback").build().toString();
-    logger.info("callback URL after logging:" + callbackUri);
+    log.info("callback URL after logging:" + callbackUri);
 
     final OAuth10aService service =
-        new ServiceBuilder(twitterApikey)
-            .apiSecret(twitterSecret)
+        new ServiceBuilder(config.credential.getTwitterKey())
+            .apiSecret(config.credential.getTwitterSecret())
             .callback(callbackUri)
             .build(TwitterApi.instance());
 
@@ -73,7 +68,7 @@ public class TwitterAuthResource {
     try {
       requestToken = service.getRequestToken();
     } catch (InterruptedException | ExecutionException | IOException e) {
-      logger.catching(e);
+      log.catching(e);
       ErrorDto error = new ErrorDto();
       error.setMessage("faild to access twitter auth providing server");
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -119,7 +114,9 @@ public class TwitterAuthResource {
       if (denied.equals("admit")) {
         // 認証許可の場合
         final OAuth10aService service =
-            new ServiceBuilder(twitterApikey).apiSecret(twitterSecret).build(TwitterApi.instance());
+            new ServiceBuilder(config.credential.getTwitterKey())
+                .apiSecret(config.credential.getTwitterSecret())
+                .build(TwitterApi.instance());
         final OAuth1AccessToken accessToken = service.getAccessToken(requestToken, oauthVerifier);
 
         final OAuthRequest request =
@@ -136,21 +133,21 @@ public class TwitterAuthResource {
         loginSession.setUserId(userId);
         loginSession.setUserName(screenName);
 
-        logger.info("loging requesting user admit. user id: %s", userId);
+        log.info("loging requesting user admit. user id: %s", userId);
         try {
           userService.getById(loginSession.getUserId());
         } catch (NoResourceException notRegisterd) {
-          logger.info("loging requesting user not exist in DB. register!");
+          log.info("loging requesting user not exist in DB. register!");
           userService.create(loginSession.getUserId(), loginSession.getUserName());
         }
 
       } else {
         // 認証不許可の場合
         loginSession.invalidate();
-        logger.info("loging requesting user deny.");
+        log.info("loging requesting user deny.");
       }
     } catch (ExecutionException | InterruptedException | IOException e) {
-      logger.catching(e);
+      log.catching(e);
       ErrorDto error = new ErrorDto();
       error.setMessage("faild to access twitter auth providing server");
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
