@@ -102,7 +102,7 @@ public class ScoreResource {
       produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity insertScore(
       @PathVariable("game_name") String gameName,
-      InsertScoreForm insertScoreForm,
+      @RequestBody InsertScoreForm insertScoreForm,
       UriComponentsBuilder uriBuilder)
       throws InvalidArgumentException {
 
@@ -151,7 +151,7 @@ public class ScoreResource {
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity postPlayLog(
-      @PathVariable("game_name") String gameName, InsertScoreForm insertScoreForm) {
+      @PathVariable("game_name") String gameName, @RequestBody InsertScoreForm insertScoreForm) {
     // ゲーム名の入力チェック
     String upperCaseGameName = gameName.toUpperCase();
     if (!GameType.contains(upperCaseGameName)) {

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.transaction.Transactional;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.ApplicationConfig;
 import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;

@@ -10,7 +10,6 @@ import com.github.scribejava.core.oauth.OAuth10aService;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.ApplicationConfig;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;

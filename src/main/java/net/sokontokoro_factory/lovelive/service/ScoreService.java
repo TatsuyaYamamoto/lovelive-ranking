@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
 import net.sokontokoro_factory.lovelive.domain.score.Score;
