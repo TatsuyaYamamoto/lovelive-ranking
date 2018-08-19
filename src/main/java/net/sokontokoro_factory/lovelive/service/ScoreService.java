@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
 import net.sokontokoro_factory.lovelive.domain.score.Score;
 import net.sokontokoro_factory.lovelive.domain.score.ScoreRepository;
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Log4j2
+@Slf4j
 public class ScoreService {
   private final ScoreRepository scoreRepo;
 
@@ -73,7 +74,7 @@ public class ScoreService {
    * @return
    */
   public Long getRankingNumber(GameType targetGame, int targetPoint) {
-    log.entry("getRanking()", targetGame, targetPoint);
+    log.debug("getRanking()", targetGame, targetPoint);
 
     List<Score> allScore = scoreRepo.findAll();
     long ranking =
@@ -85,7 +86,9 @@ public class ScoreService {
                 .count()
             + 1;
 
-    return log.traceExit(ranking);
+    log.debug("result: " + ranking);
+
+    return ranking;
   }
 
   /**
@@ -97,7 +100,6 @@ public class ScoreService {
    * @return
    */
   public List<Score> getList(GameType targetGame, int offsetRankingNumber, int range) {
-    log.entry(targetGame, offsetRankingNumber);
     int offsetBorderPoint = getBorderPoint(targetGame, offsetRankingNumber);
     int limitBorderPoint = getBorderPoint(targetGame, offsetRankingNumber + range);
 
@@ -112,7 +114,7 @@ public class ScoreService {
             .sorted(comparing(Score::getPoint).reversed())
             .collect(Collectors.toList());
 
-    return log.traceExit(topScores);
+    return topScores;
   }
 
   /**
@@ -123,7 +125,6 @@ public class ScoreService {
    * @return
    */
   public int getBorderPoint(GameType targetGame, int targetRankingNumber) {
-    log.entry(targetGame);
     List<Score> allScore = scoreRepo.findAll();
 
     List<Integer> descPoints =
@@ -147,6 +148,6 @@ public class ScoreService {
       borderPoint = descPoints.get(targetRankingNumber - 1);
     }
     log.info("game: " + targetGame + ", borderpoint: " + borderPoint);
-    return log.traceExit(borderPoint);
+    return borderPoint;
   }
 }

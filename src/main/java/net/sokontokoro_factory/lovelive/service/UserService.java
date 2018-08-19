@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.ApplicationConfig;
 import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
 import net.sokontokoro_factory.lovelive.domain.user.User;
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Log4j2
+@Slf4j
 public class UserService {
   private ApplicationConfig config;
   private final UserRepository userRepos;
@@ -34,12 +35,10 @@ public class UserService {
 
   public String getProfileImageUrl(long userId, OAuth1AccessToken accessToken)
       throws InterruptedException, ExecutionException, IOException {
-    log.entry(userId, accessToken);
-
     /* twitterサーバーへの問い合わせ */
     final OAuth10aService service =
-        new ServiceBuilder(config.credential.getTwitterKey())
-            .apiSecret(config.credential.getTwitterSecret())
+        new ServiceBuilder(config.getCredential().getTwitterKey())
+            .apiSecret(config.getCredential().getTwitterSecret())
             .build(TwitterApi.instance());
     final OAuthRequest request =
         new OAuthRequest(Verb.GET, "https://api.twitter.com/1.1/users/show.json?user_id=" + userId);
@@ -49,7 +48,7 @@ public class UserService {
     JSONObject usersShowJson = new JSONObject(body);
 
     String profileImageUrl = usersShowJson.get("profile_image_url").toString();
-    return log.traceExit(profileImageUrl);
+    return profileImageUrl;
   }
 
   /**
@@ -60,8 +59,6 @@ public class UserService {
    * @throws NoResourceException 存在しない、または論理削除済みの場合
    */
   public User getById(long userId) throws NoResourceException {
-    log.entry(userId);
-
     Optional<User> user = User.get(userRepos, userId);
 
     if (user.isPresent()) {
@@ -79,9 +76,7 @@ public class UserService {
    */
   @Transactional
   public void create(long userId, String name) {
-    log.entry(userId, name);
     User.create(userRepos, userId, name);
-    log.traceExit();
   }
 
   /**
@@ -95,8 +90,6 @@ public class UserService {
   @Transactional
   public void update(long userId, String name, FavoriteType favorite) throws NoResourceException {
 
-    log.entry(userId, name, favorite);
-
     /* 更新対象のuser objectを取得 */
     User updateUser = getById(userId);
 
@@ -107,8 +100,6 @@ public class UserService {
     if (favorite != null) {
       updateUser.setFavorite(favorite);
     }
-
-    log.traceExit();
   }
 
   /**
@@ -119,11 +110,7 @@ public class UserService {
    */
   @Transactional
   public void delete(long userId) throws NoResourceException {
-    log.entry(userId);
-
     User user = getById(userId);
     user.delete();
-
-    log.traceExit();
   }
 }
