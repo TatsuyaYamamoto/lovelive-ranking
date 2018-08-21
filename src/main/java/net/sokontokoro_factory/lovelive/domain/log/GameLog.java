@@ -2,6 +2,7 @@ package net.sokontokoro_factory.lovelive.domain.log;
 
 import javax.persistence.*;
 import lombok.Data;
+import lombok.NonNull;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
 
 @Entity
@@ -42,12 +43,12 @@ public class GameLog {
   private String locale;
 
   public static GameLog add(
-      GameLogRepository repository,
-      GameType game,
-      long userId,
-      int point,
+      @NonNull GameLogRepository repository,
+      @NonNull GameType game,
+      Long userId,
+      @NonNull Integer point,
       String sessionId,
-      long startSessionDate,
+      Long startSessionDate,
       String clientIp,
       String userAgent,
       String locale) {

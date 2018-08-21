@@ -1,6 +1,7 @@
 package net.sokontokoro_factory.lovelive.service;
 
 import javax.transaction.Transactional;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.domain.log.GameLog;
 import net.sokontokoro_factory.lovelive.domain.log.GameLogRepository;
@@ -29,7 +30,7 @@ public class LogService {
    * @param point
    */
   @Transactional
-  public void addGameLog(GameType game, Long userId, int point) {
+  public void addGameLog(@NonNull GameType game, Long userId, @NonNull Integer point) {
     GameLog.add(
         gameLogRepository,
         game,
