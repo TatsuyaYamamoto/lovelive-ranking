@@ -9,6 +9,9 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {
 
@@ -22,16 +25,17 @@ public class Application extends SpringBootServletInitializer {
   }
 
   @Bean
-  public WebMvcConfigurer corsConfigurer() {
+  public WebMvcConfigurer corsConfigurer(ApplicationConfig config) {
+    List<String> allowedOriginList = config.getAllowedOrigins();
+    int allowedOriginsSize = allowedOriginList.size();
+    String[] allowedOriginArray = allowedOriginList.toArray(new String[allowedOriginsSize]);
+
     return new WebMvcConfigurerAdapter() {
       @Override
       public void addCorsMappings(CorsRegistry registry) {
         registry
             .addMapping("/**")
-            .allowedOrigins(
-                "http://localhost",
-                "http://games.sokontokoro-factory.net",
-                "https://games.sokontokoro-factory.net")
+            .allowedOrigins(allowedOriginArray)
             .allowedMethods("*")
             .allowedHeaders("*")
             .allowCredentials(true);

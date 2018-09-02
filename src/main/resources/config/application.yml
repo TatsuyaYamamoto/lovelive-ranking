@@ -21,3 +21,8 @@ app:
   credential:
     twitter-key:
     twitter-secret:
+  allowed-origins:
+    - http://localhost:8000
+    - http://localhost:8080
+    - http://games.sokontokoro-factory.net
+    - https://games.sokontokoro-factory.net

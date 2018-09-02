@@ -3,11 +3,14 @@ package net.sokontokoro_factory.lovelive;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
 
 @Configuration
 @ConfigurationProperties(prefix = "app")
@@ -23,4 +26,7 @@ public class ApplicationConfig extends SpringBootServletInitializer {
     @NotBlank private String twitterKey;
     @NotBlank private String twitterSecret;
   }
+
+  @NonNull
+  private List<String> allowedOrigins;
 }
