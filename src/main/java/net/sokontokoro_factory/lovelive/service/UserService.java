@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 import javax.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.ApplicationConfig;
-import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
+import net.sokontokoro_factory.lovelive.domain.types.Member;
 import net.sokontokoro_factory.lovelive.domain.user.User;
 import net.sokontokoro_factory.lovelive.domain.user.UserRepository;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
@@ -87,7 +87,7 @@ public class UserService {
    * @throws NoResourceException ユーザーIDが存在しない場合
    */
   @Transactional
-  public void update(long userId, String name, FavoriteType favorite) throws NoResourceException {
+  public void update(long userId, String name, Member favorite) throws NoResourceException {
 
     /* 更新対象のuser objectを取得 */
     User updateUser = getById(userId);

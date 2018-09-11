@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
 import net.sokontokoro_factory.lovelive.domain.score.Score;
 import net.sokontokoro_factory.lovelive.domain.score.ScoreRepository;
+import net.sokontokoro_factory.lovelive.domain.types.Member;
 import net.sokontokoro_factory.lovelive.exception.InvalidArgumentException;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +64,27 @@ public class ScoreService {
     if (!score.isPresent()) {
       Score.create(scoreRepo, game, userId, point);
     } else {
-      score.get().updatePoint(point);
+      score.get().updatePoint(point, null);
+    }
+  }
+
+  /**
+   * スコア情報をupsertする
+   *
+   * @param game
+   * @param userId
+   * @param point
+   * @throws InvalidArgumentException
+   */
+  @Transactional
+  public void insertScore(@NonNull GameType game, @NonNull Member member, long userId, int point) {
+
+    Optional<Score> score = Score.get(scoreRepo, game, userId);
+    if (!score.isPresent()) {
+      Score created = Score.create(scoreRepo, game, userId, point);
+      created.setMember(member);
+    } else {
+      score.get().updatePoint(point, member);
     }
   }
 

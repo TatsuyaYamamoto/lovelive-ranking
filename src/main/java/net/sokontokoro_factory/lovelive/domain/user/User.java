@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import net.sokontokoro_factory.lovelive.domain.score.Score;
+import net.sokontokoro_factory.lovelive.domain.types.Member;
 
 @Entity
 @Table(name = "user")
@@ -27,7 +28,7 @@ public class User {
   @Setter
   @Column(name = "favorite", nullable = true)
   @Enumerated(EnumType.STRING)
-  private FavoriteType favorite;
+  private Member favorite;
 
   @Column(name = "deleted", nullable = false)
   private boolean deleted;

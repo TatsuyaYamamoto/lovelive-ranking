@@ -4,6 +4,7 @@ import javax.persistence.*;
 import lombok.Data;
 import lombok.NonNull;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
+import net.sokontokoro_factory.lovelive.domain.types.Member;
 
 @Entity
 @Table(name = "game_log")
@@ -17,6 +18,11 @@ public class GameLog {
   @Column(name = "game", nullable = false)
   @Enumerated(EnumType.STRING)
   private GameType game;
+
+  // TODO migration not to be nullable
+  @Column(name = "member", nullable = true)
+  @Enumerated(EnumType.STRING)
+  private Member member;
 
   @Column(name = "user_id")
   private Long userId;
@@ -45,6 +51,7 @@ public class GameLog {
   public static GameLog add(
       @NonNull GameLogRepository repository,
       @NonNull GameType game,
+      Member member,
       Long userId,
       @NonNull Integer point,
       String sessionId,
@@ -54,6 +61,7 @@ public class GameLog {
       String locale) {
     GameLog log = new GameLog();
     log.setGame(game);
+    log.setMember(member);
     log.setUserId(userId);
     log.setPoint(point);
     log.setPlayDate(System.currentTimeMillis());

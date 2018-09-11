@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+@Deprecated
 @RestController
 @RequestMapping("scores")
 public class ScoreResource {
@@ -162,8 +163,7 @@ public class ScoreResource {
 
     /* ロギング */
     GameType game = GameType.valueOf(upperCaseGameName);
-    logService.addGameLog(
-        game, loginSession != null ? loginSession.getUserId() : null, insertScoreForm.getPoint());
+    logService.addGameLog(game, null, loginSession.getUserId(), insertScoreForm.getPoint());
 
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }

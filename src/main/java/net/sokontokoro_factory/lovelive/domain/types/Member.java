@@ -1,10 +1,10 @@
-package net.sokontokoro_factory.lovelive.domain.user;
+package net.sokontokoro_factory.lovelive.domain.types;
 
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 
-public enum FavoriteType {
+public enum Member {
   HONOKA(1, "honoka"),
   ERI(2, "eri"),
   KOTORI(3, "kotori"),
@@ -18,7 +18,7 @@ public enum FavoriteType {
   CHIKA(10, "chika"),
   RIKO(11, "riko"),
   KANAN(12, "kanan"),
-  DAIYA(13, "daiya"),
+  DIA(13, "dia"),
   YOU(14, "you"),
   YOSHIKO(15, "yoshiko"),
   HANAMARU(16, "hanamaru"),
@@ -29,19 +29,19 @@ public enum FavoriteType {
 
   @Getter private String code;
 
-  FavoriteType(int id, String code) {
+  Member(int id, String code) {
     this.id = id;
     this.code = code;
   }
 
-  public static FavoriteType codeOf(final String code) {
+  public static Member codeOf(final String code) {
     return codeToEnum.get(code);
   }
 
-  private static final Map<String, FavoriteType> codeToEnum =
-      new HashMap<String, FavoriteType>() {
+  private static final Map<String, Member> codeToEnum =
+      new HashMap<String, Member>() {
         {
-          for (FavoriteType favorite : FavoriteType.values()) put(favorite.getCode(), favorite);
+          for (Member favorite : Member.values()) put(favorite.getCode(), favorite);
         }
       };
 }

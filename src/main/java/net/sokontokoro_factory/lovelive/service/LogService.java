@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sokontokoro_factory.lovelive.domain.log.GameLog;
 import net.sokontokoro_factory.lovelive.domain.log.GameLogRepository;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
+import net.sokontokoro_factory.lovelive.domain.types.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,10 +31,12 @@ public class LogService {
    * @param point
    */
   @Transactional
-  public void addGameLog(@NonNull GameType game, Long userId, @NonNull Integer point) {
+  public void addGameLog(
+      @NonNull GameType game, Member member, Long userId, @NonNull Integer point) {
     GameLog.add(
         gameLogRepository,
         game,
+        member,
         userId,
         point,
         loginSession.getRequest().getRequestedSessionId(),

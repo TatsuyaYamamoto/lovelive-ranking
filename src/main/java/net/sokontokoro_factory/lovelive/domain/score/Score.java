@@ -4,6 +4,8 @@ import java.util.Optional;
 import javax.persistence.*;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.Setter;
+import net.sokontokoro_factory.lovelive.domain.types.Member;
 import net.sokontokoro_factory.lovelive.domain.user.User;
 
 /**
@@ -31,6 +33,11 @@ public class Score {
 
   @Column(name = "point", nullable = false)
   private Integer point;
+
+  // TODO migration to be non nullable.
+  @Column(name = "member", nullable = true)
+  @Enumerated(EnumType.STRING)
+  private Member member;
 
   @Column(name = "create_date", nullable = false)
   private Long createDate;
@@ -67,10 +74,13 @@ public class Score {
     return repo.save(score);
   }
 
-  public boolean updatePoint(int newPoint) {
+  public boolean updatePoint(int newPoint, Member member) {
     boolean isUpdated = false;
     if (this.point < newPoint) {
       this.point = newPoint;
+      if (member != null) {
+        this.member = member;
+      }
       isUpdated = true;
     }
     this.count += 1;

@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException;
 import net.sokontokoro_factory.lovelive.controller.dto.ErrorDto;
 import net.sokontokoro_factory.lovelive.controller.dto.UserDto;
 import net.sokontokoro_factory.lovelive.controller.form.UpdateUserForm;
-import net.sokontokoro_factory.lovelive.domain.user.FavoriteType;
+import net.sokontokoro_factory.lovelive.domain.types.Member;
 import net.sokontokoro_factory.lovelive.domain.user.User;
 import net.sokontokoro_factory.lovelive.exception.NoResourceException;
 import net.sokontokoro_factory.lovelive.service.LoginSession;
@@ -92,10 +92,10 @@ public class UserResource {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
-    FavoriteType favorite = null;
+    Member favorite = null;
     // キャラ名の入力チェック
     if (updateUserForm.getFavorite() != null) {
-      favorite = FavoriteType.codeOf(updateUserForm.getFavorite());
+      favorite = Member.codeOf(updateUserForm.getFavorite());
       if (favorite == null) {
         ErrorDto errorDto = new ErrorDto("正しいキャラクター名を指定して下さい");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
