@@ -4,7 +4,6 @@ import java.util.Optional;
 import javax.persistence.*;
 import lombok.Data;
 import lombok.NonNull;
-import lombok.Setter;
 import net.sokontokoro_factory.lovelive.domain.types.Member;
 import net.sokontokoro_factory.lovelive.domain.user.User;
 

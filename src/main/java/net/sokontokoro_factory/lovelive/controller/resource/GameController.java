@@ -1,5 +1,6 @@
 package net.sokontokoro_factory.lovelive.controller.resource;
 
+import javax.validation.Valid;
 import net.sokontokoro_factory.lovelive.controller.form.PostScoreForm;
 import net.sokontokoro_factory.lovelive.domain.score.GameType;
 import net.sokontokoro_factory.lovelive.domain.types.Member;
@@ -10,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("games")
